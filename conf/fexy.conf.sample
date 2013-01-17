@@ -1,0 +1,8 @@
+NodeJS="/usr/local/bin/node"
+Coffee="/usr/local/bin/coffee"
+RootPath="/var/www"
+SrcPath="$RootPath/sources"
+AppPath="$RootPath/apps"
+App="$AppPath/app.js"
+LogFile="$RootPath/logs/develop.log"
+lockfile="/var/lock/subsys/node-server"
