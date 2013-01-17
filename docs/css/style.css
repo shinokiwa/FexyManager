@@ -1,0 +1,50 @@
+header,footer {
+	background-color: #000;
+}
+
+footer {
+	border-top: 1px solid #eeeeee;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight:normal;
+    margin:.8em 0 .2em 0;
+	line-height:1em;
+}
+h1, h2, h3 {
+	border-bottom: 1px solid #eeeeee;
+}
+
+h1 {
+	font-size:1.8em;
+	margin-bottom:.5em;
+	font-weight:bold;
+}
+h2 {
+	font-size:1.6em;
+	margin-bottom:.5142em;
+	padding-top:.2em;
+	font-weight:bold;
+}
+h3 {
+	font-size:1.2em;
+	margin-bottom:.7em;
+	padding-top:1.3em;
+	font-weight:bold;
+	color:#555;
+}
+h4 {
+	border-left:4px solid #555;
+	padding:6px;
+	font-size:1em;
+	margin-top:1.5em;
+	margin-bottom:.6em;
+	margin-left:1em;
+	font-weight:bold;
+	background-color:#EEEEEE;
+}
+h5, h6 {
+	font-size:1em;
+	margin-bottom:.5em;
+	font-weight:bold;
+}

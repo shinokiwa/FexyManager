@@ -1,20 +1,13 @@
-###
-フォルダ情報操作DBモデル
-物理フォルダ、論理フォルダ双方を管理する。
-@author shinokiwa
-###
-
 mongoose = require 'mongoose'
 Schema = mongoose.Schema
 ObjectId = mongoose.Types.ObjectId
 log =require '../log'
 
-configs = require './configs'
+models = require './index'
 fs = require 'fs'
 path = require 'path'
 __ = require '../i18n'
 async = require 'async'
-resources = require './resources'
 
 FilesSchema = new Schema
 	name: { type: String, required: true }
@@ -38,10 +31,7 @@ FoldersSchema.virtual('path').get ->
 # 自動判定のみなのでsetはない
 FoldersSchema.virtual('block').get ->
 	if !@_block?
-		block = @name.substring 0,1
-		if block is "."
-			block = "[dot]"
-		@_block = new resources (path.join configs.folders.fexy, block)
+		@_block = models.blocks @name
 	return @_block
 
 # 指定パス
@@ -102,17 +92,9 @@ FoldersSchema.pre 'remove', (next)->
 Files = mongoose.model 'Files', FilesSchema
 Folders = mongoose.model 'Folders', FoldersSchema
 
+f = (name) ->
+	folderName = fs.basename name
 
-###
- 以下、Foldersモデル自体のメソッド
-###
-
-###
-新しい論理フォルダのインスタンスを生成する
-@param String srcPath
-@return bool
-###
-Folders.newFolder = (srcPath) ->
 	folder = new Folders {src: srcPath}
 	# infoファイルを読み込む
 	if folder.src.info.exists()
