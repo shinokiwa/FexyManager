@@ -4,26 +4,16 @@
 # description: Node.js /home/nodejs/node-server/server.js
 #
 
-Configs="`dirname ${0}`/../conf/fexy.conf"
+NodeJS="/usr/local/bin/node"
+App="`dirname ${0}`/../fexy.js"
+lockfile="/var/lock/subsys/node-server"
 
-if [ $2 ] ; then
-	Configs=$2
-else
-	Configs="`dirname ${0}`/../conf/fexy.conf"
-fi
-
-. $Configs
-
-. $Configs
- 
 start()
 {
     if [ ! -f $lockfile ] ; then
         echo -n "Starting $App: "
-        su -c "umask 0000"
-        su -c "nohup $NodeJS $App >> $LogFile 2>&1 &" && echo "SUCCESS" || echo "FAILED"
+        su -c "nohup $NodeJS $App start >> /dev/null 2>&1 &" && echo "SUCCESS" || echo "FAILED"
         RETVAL=$?
-        echo
         [ $RETVAL -eq 0 ] && touch $lockfile
     else
         echo "$App is locked."
@@ -37,7 +27,6 @@ stop()
     pid=`ps -aefw | grep "$NodeJS $App" | grep -v " grep " | awk '{print $2}'`
     kill -9 $pid > /dev/null 2>&1 && echo "SUCCESS" || echo "FAIL"
     RETVAL=$?
-    echo
     [ $RETVAL -eq 0 ] && rm -f $lockfile
 }
 
@@ -53,8 +42,8 @@ case "$1" in
         start
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
-        RETVAL=1
+    	$NodeJS $App $@
+        RETVAL=$?
 esac
 
 exit $RETVAL
