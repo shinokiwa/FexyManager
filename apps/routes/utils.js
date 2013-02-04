@@ -1,6 +1,6 @@
 var auth, init, initJSON;
 
-module.exports = {
+var u = {
 		useJSON: function(req, res, next) {
 			res.locals = {
 				err: null,
@@ -28,5 +28,10 @@ module.exports = {
 			} else {
 				res.locals.set({auth: false}).send();
 			}
+		},
+		error: function (req, res, e) {
+			res.locals.set({err: e.message, data: e.stack}).send();
 		}
 }
+
+module.exports = u;

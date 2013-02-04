@@ -1,5 +1,4 @@
 var c = require('../controllers').user;
-var log = require('../controllers').log;
 
 module.exports.login = function (utils) {
 	return [utils.useJSON, function(req, res) {
@@ -24,8 +23,9 @@ module.exports.login = function (utils) {
 }
 module.exports.logout = function (utils) {
 	return [utils.useJSON, function(req, res) {
-		console.log("Start Logout.");
 		req.session.user = {};
-		return res.redirect(302, '/');
+		res.locals.set({
+			reload: true
+		}).send();
 	}];
 }

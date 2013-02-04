@@ -21,10 +21,6 @@ module.exports.start = function () {
 		app.use(express["static"](path.join(__dirname, '../public')));
 	});
 
-	app.configure('development', function() {
-		return app.use(express.errorHandler());
-	});
-
 	routes(app);
 
 	http.createServer(app).listen(app.get('port'), function() {

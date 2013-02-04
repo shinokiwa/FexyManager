@@ -2,26 +2,81 @@ doctype 5
 html
  head
   title Fexy Manager || Web strage explorer and viewer
-  link(rel='stylesheet', href='/css/fexy.css')
   link(rel='stylesheet', href='/css/bootstrap.min.css')
-  link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
+  link(rel='stylesheet', href='/css/fexy.css')
   script(src="/js/jquery-1.8.1.min.js", type="text/javascript")
   script(src="/js/bootstrap.min.js", type="text/javascript")
-  script(src="/js/app.js", type="text/javascript")
-  script(src="/js/view.js", type="text/javascript")
-  script(src="/js/detail.js", type="text/javascript")
-  script(src="/js/index.js", type="text/javascript")
-  script(src="/js/login.js", type="text/javascript")
-  meta(name="viewport", content="width=920, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0, ")
+  script(src="/js/fexy.js", type="text/javascript")
+  meta(name="viewport", content="width=device-width")
   meta(http-equiv="Cache-Control",content="no-cache")
+  link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
   //[if lte IE 8]><script type="text/javascript" src="/js/html5.js"></script><![endif]
  body
-   header
-    div
-     h1
-      a#header-logo(href="/") Fexy
-   div#wrapper.container-fluid
-    div#Message.alert.alert-info.hide
-    include login
-    include folderindex
-    include folderdetail
+  header.navbar.navbar-fixed-top
+   #Information.container-fluid Information Area
+   #Navi.navbar-inner
+    button.btn.btn-navbar(type="button",data-toggle="collapse",data-target=".nav-collapse")
+     span.icon-bar
+     span.icon-bar
+     span.icon-bar
+    .nav-collapse.collapse
+     ul#NavMenu.nav
+      li
+       a(href="#")
+        i.icon-tags
+        | Tags
+      li
+       a(href="#")
+        i.icon-refresh
+        | Sync
+      li
+       a(href="/upstream")
+        i.icon-arrow-up
+        | Upstream
+      li
+       a(href="/user/logout")
+        i.icon-off
+        | Logout
+    form#Search.pull-right.container-fluid.form-search.navbar-form(name="Search", action="/folder/search.json",method="post")
+     .input-append
+      input.span2.search-query(type="text")
+      button.btn(type="submit")
+       i.icon-search
+  #Wrapper
+   .container-fluid
+    #Message.alert.alert-info.hide
+     button.close(type="button") ×
+   #Login.hide.container-fluid
+    form#LoginForm.box(name="LoginForm", action="/user/login.json",method="post")
+     label UserID
+     input#username.input-block-level(type="text", name="username", placeholder="Input UserID here.", maxlength="12", "ime-mode"="off")
+     label Password
+     input#password.input-block-level(type="password", name="password", placeholder="Input Password here.", maxlength="12", "ime-mode"="off")
+     input#submitLogin.btn.btn-primary(type="submit",value="Login", data-loading-text="Loading...")
+   #Index.view.hide
+    ul.media-list
+     li.media.container-fluid.hide
+      img.pull-left.media-object(src="/img/noimage.jpg")
+      .media-body
+       h4.media-heading (non-title)
+       | (non-tags)
+   #Detail.view
+    div.modal.hide
+     .modal-header
+      button.close.closeDetail(type="button") &times;
+      h3 No-Title
+     .modal-body
+      .media
+       img.pull-left.media-object(src="/img/noimage.jpg")
+       .media-body
+        | Non description
+     .modal-footer
+      button.btn.closeDetail(type="button") Close
+      button#BtnFull.btn.btn-primary(type="button") View
+   #Full.view.hide
+    #FullCarousel.carousel.slide(data-interval="0")
+     .carousel-inner
+     a.carousel-control.left(href="#FullCarousel",data-slide="prev") &lsaquo;
+     a.carousel-control.right(href="#FullCarousel",data-slide="next") &rsaquo;
+  #HiddenForm.hide
+   form#Action(name="Action", action="#",method="get")

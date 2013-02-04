@@ -7,6 +7,8 @@ lib-cov
 *.pid
 *.gz
 *.conf.js
+folders/*
+upstream/*
 
 node_modules
 logs

@@ -1,8 +1,0 @@
-div#LoginForm
- form#login.login(name="login", action="/user/login.json",method="post")
-  fieldset
-   label(for="username") User Name
-    input#username(type="text", name="username", maxlength="12", "ime-mode"="off")
-   label(for="password") Password
-    input#password(type="password", name="password", maxlength="12", "ime-mode"="off")
-   input#submitLogin.btn(type="submit",value="Login", data-loading-text="Loading...")

@@ -30,7 +30,7 @@ module.exports.create = function(name, pass, next) {
 	}, function(e, data) {
 		if (data.length > 0) {
 			log.debug ("[Controllers.user]User is already exist.");
-			return next(null, "User is already exist.");
+			next(null, "User is already exist.");
 		} else {
 			user = new Users ({
 				userName: name,
@@ -38,7 +38,7 @@ module.exports.create = function(name, pass, next) {
 			});
 			user.save(function (e) {
 				log.debug ("[Controllers.user]Create User.");
-				return next(null, "Create User.");
+				next(null, "Create User.");
 			});
 		}
 	});
