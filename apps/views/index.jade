@@ -2,25 +2,29 @@ doctype 5
 html
  head
   title Fexy Manager || Web strage explorer and viewer
+  meta(http-equiv="Cache-Control",content="no-cache")
+  meta(name="viewport", content="width=device-width")
   link(rel='stylesheet', href='/css/bootstrap.min.css')
   link(rel='stylesheet', href='/css/fexy.css')
   script(src="/js/jquery-1.8.1.min.js", type="text/javascript")
   script(src="/js/bootstrap.min.js", type="text/javascript")
   script(src="/js/fexy.js", type="text/javascript")
-  meta(name="viewport", content="width=device-width")
-  meta(http-equiv="Cache-Control",content="no-cache")
-  link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
   //[if lte IE 8]><script type="text/javascript" src="/js/html5.js"></script><![endif]
  body
   header.navbar.navbar-fixed-top
    #Information.container-fluid Information Area
-   #Navi.navbar-inner
-    button.btn.btn-navbar(type="button",data-toggle="collapse",data-target=".nav-collapse")
+   #Navi.navbar-inner.hide
+    button.btn.btn-navbar.pull-left(type="button",data-toggle="collapse",data-target=".nav-collapse")
      span.icon-bar
      span.icon-bar
      span.icon-bar
+    form#Search.pull-right.container-fluid.form-search.navbar-form(name="Search", action="#",method="get")
+     .input-append
+      input.span2.search-query(type="text")
+      button.btn(type="submit")
+       i.icon-search
     .nav-collapse.collapse
-     ul#NavMenu.nav
+     ul#NaviMenu.nav
       li
        a(href="#")
         i.icon-tags
@@ -37,15 +41,11 @@ html
        a(href="/user/logout")
         i.icon-off
         | Logout
-    form#Search.pull-right.container-fluid.form-search.navbar-form(name="Search", action="/folder/search.json",method="post")
-     .input-append
-      input.span2.search-query(type="text")
-      button.btn(type="submit")
-       i.icon-search
   #Wrapper
    .container-fluid
     #Message.alert.alert-info.hide
      button.close(type="button") ×
+     span
    #Login.hide.container-fluid
     form#LoginForm.box(name="LoginForm", action="/user/login.json",method="post")
      label UserID
@@ -60,23 +60,15 @@ html
       .media-body
        h4.media-heading (non-title)
        | (non-tags)
-   #Detail.view
-    div.modal.hide
-     .modal-header
-      button.close.closeDetail(type="button") &times;
-      h3 No-Title
-     .modal-body
-      .media
-       img.pull-left.media-object(src="/img/noimage.jpg")
-       .media-body
-        | Non description
-     .modal-footer
+   #Detail.view.hide
+    .media.container-fluid
+     img.pull-left.media-object(src="/img/noimage.jpg")
+     .media-body
+      h3.media-heading Non-Title
+      | Non description
+      hr
       button.btn.closeDetail(type="button") Close
       button#BtnFull.btn.btn-primary(type="button") View
    #Full.view.hide
-    #FullCarousel.carousel.slide(data-interval="0")
-     .carousel-inner
-     a.carousel-control.left(href="#FullCarousel",data-slide="prev") &lsaquo;
-     a.carousel-control.right(href="#FullCarousel",data-slide="next") &rsaquo;
   #HiddenForm.hide
    form#Action(name="Action", action="#",method="get")
