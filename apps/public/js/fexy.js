@@ -1,140 +1,183 @@
-$.fn.open = function () {
-	$('.view:visible').close();
-	$(this).trigger('open').show();
+$.fn.open = function() {
+	return $(this).trigger('open');
 }
-$.fn.close = function () {
-	$(this).trigger('close').hide();
+$.fn.close = function() {
+	return $(this).trigger('close');
 }
 
 $(document).ready(function() {
-
+	$.ajaxSetup({
+		dataType : 'json',
+		type : 'post',
+		success : function(res, textStatus, xhr) {
+			if (res.reload == true) {
+				location.reload();
+			}
+			if (res.message)
+				$('#Message').data('msg', res.message).open();
+		},
+		error : function(res, textStatus, textError) {
+			if (res.status == 401) {
+				$('#Login').open();
+			}
+		}
+	});
 	$(window).bind({
-		'hashchange': function (e) {
+		'hashchange' : function(e) {
 			$('.view:visible').hide();
 			var hash = location.hash.split('/');
-			$(this).data('view', (hash[0])?hash[0]:'#Index');
-			$(this).data('folder', (hash[1] !== undefined)?hash[1]:null);
-			$(this).data('file', (hash[2] !== undefined)?hash[2]:null);
+			$(this).data('view', (hash[0]) ? hash[0] : '#Index');
+			$(this).data('folder', (hash[1] !== undefined) ? hash[1] : null);
+			$(this).data('file', (hash[2] !== undefined) ? hash[2] : null);
 			$($(this).data('view')).open();
 		}
 	});
 
-	$.ajaxSetup({
-		dataType: 'json',
-		type: 'post',
-		success: function(res, textStatus, settings) {
-			console.log (res);
-			if (res.reload == true) {
-				location.reload();
-				return false;
-			}
-			if (res.message) $('#Message').data('msg', res.message).open();
-			if (res.auth == false) {
-				$('#Login').open();
-				return false;
-			}
-			settings.complete(res);
-		}
-		
-	});
-	
-	$('#Navi').bind ({
-		'open, close': function (e) {
-			$('body').css('padding-top', $('header').height() + 20 + 'px');
+	$('#Navi').bind({
+		'open' : function(e) {
+			$(this).show(0, function() {
+				$('body').css('padding-top', $('header').height() + 20 + 'px');
+
+			});
+		},
+		'close' : function(e) {
+			$(this).hide(0, function() {
+				$('body').css('padding-top', $('header').height() + 20 + 'px');
+			});
 		}
 	});
-	
+
 	$('#Message').bind({
 		'open' : function(e) {
 			$('#Message span').text($(this).data('msg'));
 			$('#Message').slideDown('fast');
 		}
-	}).find('#Message .close').click(function() {
+	}).children('#Message .close').click(function() {
 		$('#Message').slideUp('fast');
 	});
-	
+
 	$('#Login').bind({
-		'show' : function() {
-			$('#Navi:visible').close();
+		'open' : function() {
+			$('.view:visible, #Navi:visible').close();
 			$('#username, #password').val('');
-			$('#username').focus();
+			$(this).show(0, function() {
+				$('#username').focus()
+			});
+		},
+		'close' : function() {
+			$(this).hide();
 		}
-	}).find('form').submit(function(e){
+	}).children('form').submit(function(e) {
 		e.preventDefault();
-		$.ajax({url:'/user/login.json', data:$(this).serialize()});
+		$.ajax({
+			url : '/user/login.json',
+			data : $(this).serialize()
+		});
 	});
 
 	$('#Search').bind({
 		'submit' : function(e) {
 			e.preventDefault();
-			$.ajax({url:'/folder/search.json'}).complete(function(res){console.log(arguments);$('#Index').data('list', res.data[0]).change().open();});
+			$.ajax({
+				url : '/folder/search.json'
+			}).done(function(res) {
+				$('#Index').data('list', res.data).change();
+				$('#Index:hidden, #Navi:hidden').open();
+			});
 		}
 	});
 
-	
 	$('#Index').bind({
 		'open' : function(e) {
-			if ($(this).find('.media-list:visible').length == 0) {
-				$('#Search').submit();
-				return;
-			}
-			$('#Navi:hidden').open();
+			$(this).show(0, function() {
+				if ($(this).children('.media:visible').size() == 0) {
+					$('#Search').submit();
+				} else {
+					$('#Navi:hidden').open();
+				}
+			});
 		},
 		'change' : function() {
 			$('#Index .media:visible').remove();
-			console.log($('#Index').data());
-			var data = $(this).data('list');
-			for (var i=0; i<data.length;i++) {
-				var media = $('#Index .media:first-child').clone();
-				media.find('h4').text(data[i].name);
-				$('#Index .media-list').append(media);
-				media.show();
+			var data = $(this).data('list') || [];
+			for ( var i = 0; i < data.length; i++) {
+				var $media = $('#Index .media:first-child').clone();
+				var $mediaData = $media.contents().children('.mediaData');
+				$media.data(data[i]);
+				$mediaData.filter('[data-src=name]').text(data[i].name);
+				$('#Index .media-list').append($media);
+				$media.show();
 			}
+		},
+		'close' : function() {
+			$(this).hide();
 		}
 	}).on('click', ".media-list .media", function(e) {
 		e.preventDefault();
-		location.hash='Detail/'+$(this).find('h4').text();
+		location.hash = 'Detail/' + $(this).data('name');
 	});
 
 	$('#Detail').bind({
 		'open' : function(e) {
-			if (location.hash.length > 1) {
-				$(this).find('h3').text($(this).data('name'));
-				$('.view:visible').trigger('close');
-				$(this).show();
-			}
+			$('#Navi:hidden').open();
+			$.ajax('/folder/get.json', {
+				data : {
+					'name' : $(window).data('folder')
+				}
+			}).done(function(res) {
+				$('#Detail').data(res.data);
+				$('#Detail').change();
+				$('#Detail').show();
+			}).fail(function(res) {
+				location.hash = '';
+			});
 		},
 		'close' : function() {
-			$('#Detail .modal').modal('hide');
+			$(this).hide();
+		},
+		'change' : function (e) {
+			e.preventDefault();
+			var $mediaData = $('#Detail .mediaData');
+			$mediaData.filter('[data-src=name]').text($('#Detail').data('name'));
+			var $fileList = $('#Detail .files .file-list');
+			$fileList.children(':gt(0)').remove();
+			var fileData =$('#Detail').data('files'); 
+			for (var i=0;i<fileData.length;i++) {
+				var $file = $fileList.children('.file-list *:first-child').clone();
+				var $fileData = $file.contents().filter('.fileData');
+				$fileData.filter('[data-src=name]').text(fileData[i].name);
+				$fileList.append($file);
+				$file.show();
+			}
 		}
-	});
-	$('#Detail .closeDetail').click(function(e) {
+	}).on('click', '.fullView', function(e) {
 		e.preventDefault();
-		$('#Detail').trigger('close');
-	});
-
-	$('#Detail #BtnFull').click(function(e) {
+		location.hash = 'Full/' + $('#Detail').data('name') + '/' + $('#Detail').data('files')[0].name;
+	}).on('click', '.sync', function(e) {
 		e.preventDefault();
-		$('#Full').trigger('display', [$('#Detail').data('src')]);
+		$.ajax('/folder/sync.json', {
+			data : {
+				'name' : $(window).data('folder')
+			}
+		}).done(function(res) {
+			$('#Detail').data(res.data);
+			$('#Detail').change();
+		}).fail(function(res) {
+			location.hash = '';
+		});
 	});
 
 	$('#Full').bind({
-		'display' : function(e, data) {
-			if (data) {
-				var $div = $('<div class="item">');
-				var $item = $('<img src="/folder/view/'+data.name+'/'+data.files[0].name+'">');
-				$div.append ($item);
-				$('#Full .carousel-inner').append($div.clone());
-				$div.addClass('active');
-				$('#Full .carousel-inner').append($div);
-				$('#Full').show();
-			}
+		'open' : function(e, data) {
+			$('#Navi:visible').close();
+			$(this).show(0, function () {
+				$('#Full').html('<a href="#"><img src="/folder/view/'+$(window).data('folder')+'/'+$(window).data('file')+'" /></a>');
+			});
 		},
 		'close' : function() {
-			$('#Full').hide();
-			$('#Full .item').remove();
+			$(this).hide();
 		}
 	});
-	
-	$('#Wrapper').trigger('hashchange');
+
+	$(window).trigger('hashchange');
 });

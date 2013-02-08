@@ -4,10 +4,10 @@ html
   title Fexy Manager || Web strage explorer and viewer
   meta(http-equiv="Cache-Control",content="no-cache")
   meta(name="viewport", content="width=device-width")
-  link(rel='stylesheet', href='/css/bootstrap.min.css')
-  link(rel='stylesheet', href='/css/fexy.css')
   script(src="/js/jquery-1.8.1.min.js", type="text/javascript")
   script(src="/js/bootstrap.min.js", type="text/javascript")
+  link(rel='stylesheet', href='/css/bootstrap.min.css')
+  link(rel='stylesheet', href='/css/fexy.css')
   script(src="/js/fexy.js", type="text/javascript")
   //[if lte IE 8]><script type="text/javascript" src="/js/html5.js"></script><![endif]
  body
@@ -46,7 +46,7 @@ html
     #Message.alert.alert-info.hide
      button.close(type="button") ×
      span
-   #Login.hide.container-fluid
+   #Login.view.hide.container-fluid
     form#LoginForm.box(name="LoginForm", action="/user/login.json",method="post")
      label UserID
      input#username.input-block-level(type="text", name="username", placeholder="Input UserID here.", maxlength="12", "ime-mode"="off")
@@ -58,17 +58,54 @@ html
      li.media.container-fluid.hide
       img.pull-left.media-object(src="/img/noimage.jpg")
       .media-body
-       h4.media-heading (non-title)
-       | (non-tags)
+       h4.mediaData.media-heading(data-src="name") (non-title)
+       p.mediaData(data-src="tags") (non-tags)
    #Detail.view.hide
+    .menu.container-fluid
+     .menu-more.pull-right.dropdown
+      a.btn.dropdown-toggle#dLabel(role="button", data-toggle="dropdown", data-target="#", href="/page.html")
+       | More 
+       b.caret
+      ul.dropdown-menu(role="menu", aria-labelledby="dLabel")
+       li
+        a(href="#")
+         i.icon-download-alt
+         &nbsp;Download
+       li
+        a(href="#")
+         i.icon-download
+         &nbsp;Download Zip
+       li.divider
+       li
+        a(href="#").sync
+         i.icon-refresh
+         &nbsp;Sync
+       li.divider
+       li
+        a(href="#")
+         i.icon-plus
+         &nbsp;Upload File
+       li.divider
+       li
+        a(href="#")
+         i.icon-trash
+         &nbsp;Delete
+     .menu.btn-group
+      a.btn(href="#")
+       i.icon-list-alt
+       &nbsp;List
+      a.btn.btn-primary.fullView(href="#")
+       i.icon-fullscreen
+       &nbsp;Full View
     .media.container-fluid
      img.pull-left.media-object(src="/img/noimage.jpg")
      .media-body
-      h3.media-heading Non-Title
-      | Non description
-      hr
-      button.btn.closeDetail(type="button") Close
-      button#BtnFull.btn.btn-primary(type="button") View
+      h3.mediaData.media-heading(data-src="name") Non-Title
+      p.mediaData(data-src="description") Non description
+    .files.container-fluid
+     h5 Files
+     ul.file-list.nav.nav-list
+      li.hide
+       i.icon-file
+       span.fileData(data-src="name")
    #Full.view.hide
-  #HiddenForm.hide
-   form#Action(name="Action", action="#",method="get")

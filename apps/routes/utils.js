@@ -26,7 +26,7 @@ var u = {
 				res.locals.auth = true;
 				next();
 			} else {
-				res.locals.set({auth: false}).send();
+				res.status(401).locals.set({auth: false}).send();
 			}
 		},
 		error: function (req, res, e) {

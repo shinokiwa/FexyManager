@@ -17,7 +17,7 @@ module.exports.search = function(utils) {
 module.exports.get = function(utils) {
 	return [utils.useJSON, utils.auth, d.bind(function(req, res) {
 		d.on ('error', function (e) {utils.error(req, res, e);});
-		c.get (req.query.name, function(err, msg, data) {
+		c.get (req.body.name, function(err, msg, data) {
 			res.locals.set({
 				err: err,
 				message: msg,
@@ -29,7 +29,7 @@ module.exports.get = function(utils) {
 
 module.exports.sync = function(utils) {
 	return [utils.useJSON, utils.auth, function(req, res) {
-		c.sync (req.query.name, function(err, msg, data) {
+		c.sync (req.body.name, function(err, msg, data) {
 			res.locals.set({
 				err: err,
 				message: msg,
