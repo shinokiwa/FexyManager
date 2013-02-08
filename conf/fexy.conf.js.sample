@@ -1,8 +1,16 @@
-NodeJS="/usr/local/bin/node"
-Coffee="/usr/local/bin/coffee"
-RootPath="/var/www"
-SrcPath="$RootPath/sources"
-AppPath="$RootPath/apps"
-App="$AppPath/app.js"
-LogFile="$RootPath/logs/develop.log"
-lockfile="/var/lock/subsys/node-server"
+module.exports = {
+
+	"folders": {
+		"root": __dirname+"/../folders/",
+		"upstream": __dirname+"/../upstream/",
+		"info": ".info.json"
+	},
+	"dbs": {
+		"connection": "mongodb://localhost/fexy",
+	},
+	"logs": {
+		"path": __dirname+"/../logs/fexy.log",
+		"level": 4 // 1: fatal, 2: warn, 3: notice, 4: debug
+	},
+	"encode" : "UTF-8"
+}
