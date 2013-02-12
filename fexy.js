@@ -2,6 +2,7 @@ var path = require ('path');
 var fs = require ('fs');
 var exec = require ('child_process').exec;
 var configs = require ('./conf/fexy.conf.js');
+var controllers = require ('./apps/controllers');
 var d = require ('domain').create();
 
 d.on ('error', function (e) {
@@ -21,16 +22,16 @@ d.run (function () {
 	process.umask(0);
 	var c = {
 		start: function () {
-			require ('./apps/controllers/webservice').start()
+			controllers.webservice.start()
 		},
 		sync: function () {
 			
 		},
 		"create-user": function () {
-			require ('./apps/controllers/user').create(process.argv[3], process.argv[4], complete)
+			controllers.user.create(process.argv[3], process.argv[4], complete)
 		},
 		"upstream": function () {
-			require ('./apps/controllers/upstream').upload(complete);
+			controllers.upstream.upload(complete);
 		}
 	};
 

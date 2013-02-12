@@ -9,44 +9,57 @@ d.on('error', function(e) {
 	log.fatal("[models.resources]:" + e.message);
 });
 
-var resources = function(src) {
-	return {
+var resources = function(src, next) {
+	next({
 		path : src,
-		exists : function() {
-			return fs.existsSync(this.path);
+		exists : function(next) {
+			var r = this;
+			fs.exists(this.path, function (exists){
+				if(exists) next(r);
+			});
 		},
-		isDirectory : function() {
-			if (this.exists()) {
-				return fs.statSync(this.path).isDirectory();
-			} else {
-				return false;
-			}
+		isDirectory : function(dirNext, fileNext) {
+			this.exists(function (r) {
+				fs.stat(r.path, function(err,stats) {
+					if (stats.isDirectory()) {
+						dirNext(r);
+					} else {
+						fileNext(r);
+					}
+				});
+			});
 		},
-		toFolders : function() {
-			if (this.exists()) {
-				var basename = path.basename(this.path);
-				var folder = models.folders(basename);
-				if (this.isDirectory()) {
-					fs.renameSync(this.path, folder.path);
-				} else {
-					folder.make();
-					fs.renameSync(this.path, path.join(folder.path, basename));
-				}
-				log.info('Resource '+ this.path + ' to folder '+folder.path);
-				return folder;
-			} else {
-				return false;
-			}
+		toFolders : function(next) {
+			var r = this;
+			this.exists(function () {
+				var basename = path.basename(r.path);
+				models.folders(basename, function (folder) {
+					r.isDirectory(function (){
+						models.blocks(basename).make();
+						fs.rename(r.path, folder.path, function () {
+							log.info('Resource '+ r.path + ' to folder '+folder.path);
+							next (folder.sync());
+						});
+					}, function () {
+						folder.make();
+						fs.rename(r.path, path.join(folder.path, basename), function () {
+							log.info('Resource '+ r.path + ' to folder '+folder.path);
+							next (folder.sync());
+						});
+					});
+				});
+			})
 		},
 		toUpstream : function() {
+			var r = this;
 			if (this.exists()) {
-				var basename = path.basename(this.path);
-				fs.renameSync(this.path, path.join(models.upstream.path, basename));
-				log.info('Resource '+ this.path + ' to Upstream.');
+				var basename = path.basename(r.path);
+				fs.renameSync(r.path, path.join(models.upstream.path, basename));
+				log.info('Resource '+ r.path + ' to Upstream.');
 			}
 			return this;
 		}
-	}
+	});
 };
 
 module.exports = resources;

@@ -28,14 +28,9 @@ var u = {
 
 var prs = function(name, fn) {
 	return function(next) {
-		var resource = models.resources(path.join(u.path, name));
-
-		if (resource) {
+		models.resources(path.join(u.path, name), function (resource){
 			fn(resource, next);
-		} else {
-			if (typeof next === "function")
-				next();
-		}
+		});
 	};
 };
 

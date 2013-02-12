@@ -10,20 +10,17 @@ d.on('error', function(e) {
 });
 
 blocks = function(name) {
-	resource = models.resources(path.join(models.root.path, name));
-	if (resource.exists()) {
-		if (resource.isDirectory()) {
-			if (name.length > 1) {
-				resource.toUpstream();
-			} else {
-				if (fs.readdirSync(resource.path).length < 1) {
+	models.resources(path.join(models.root.path, name), function (resource) {
+		resource.exists(function (r) {
+			resource.isDirectory(function (resource) {
+				if (name.length > 1 || fs.readdirSync(resource.path).length < 1) {
 					resource.toUpstream();
 				}
-			}
-		} else {
-			resource.toUpstream();
-		}
-	}
+			}, function () {
+				resource.toUpstream();
+			});
+		});
+	});
 	
 	var blockName = name.match(/[^. \/]/)[0];
 

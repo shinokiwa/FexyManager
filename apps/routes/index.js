@@ -6,7 +6,7 @@ var utils = require('./utils');
 
 module.exports = function(app) {
 	app.get('/', home.index());
-	app.post('/upstream', upstream.index(utils));
+	app.all('/upstream', upstream.index(utils));
 	app.post('/folder/search.json', folder.search(utils));
 	app.post('/folder/get.json', folder.get(utils));
 	app.post('/folder/sync.json', folder.sync(utils));

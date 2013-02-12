@@ -42,14 +42,14 @@ module.exports.sync = function(utils) {
 module.exports.view = function(utils) {
 	return [utils.useJSON, utils.auth, function(req, res) {
 		c.view (req.params.folder,req.params.file, function(err, msg, data) {
-			if (data == null) {
-				res.locals.set({
+			if (data) {
+				res.sendfile(data);
+			}else {
+				res.status(404).locals.set({
 					err: err,
 					message: msg,
 					data: data
 				}).send();
-			} else {
-				res.sendfile(data);
 			}
 		});
 	}];

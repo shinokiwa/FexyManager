@@ -1,5 +1,6 @@
 var folders = require('../models').folders.schema;
 var path = require('path');
+var fs = require ('fs');
 
 var f = {
 	search : function(conditions, next) {
@@ -22,11 +23,11 @@ var f = {
 		});
 	},
 	get : function(name, next) {
-		folders.find({
+		folders.findOne({
 			name : name
 		}, function(err, data) {
 			if (typeof next === "function")
-				next(err, null, data[0]);
+				next(err, null, data);
 		});
 	},
 	view : function(folderName, fileName, next) {
@@ -37,8 +38,10 @@ var f = {
 					file = data.files[i];
 					if (file.name === fileName) {
 						ret = path.join(data.path, file.name);
+						break;
 					}
 				}
+				
 			}
 			if (typeof next === "function")
 				next(null, null, ret);

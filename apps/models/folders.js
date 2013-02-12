@@ -27,9 +27,15 @@ FoldersSchema = new Schema({
 	},
 	files : [ FilesSchema ],
 	createdUser : String,
-	createdDate : Date,
+	createdDate : {
+		type: Date,
+		"default": Date.now
+	},
 	updatedUser : String,
-	updatedDate : Date
+	updatedDate : {
+		type: Date,
+		"default": Date.now
+	}
 }, {
 	_id : false
 });
@@ -45,7 +51,7 @@ FoldersSchema.virtual('path').get(function() {
 
 FoldersSchema.virtual('info').get(function() {
 	return this.path ? path.join(this.path, configs.folders.info) : false;
-})
+});
 
 FoldersSchema.method({
 	exists : function() {
@@ -59,43 +65,44 @@ FoldersSchema.method({
 		}
 	},
 	sync : function() {
-		if (fs.existsSync(this.info)) {
-			infoStrings = fs.readFileSync(this.info, configs.encode);
-			try {
-				var infoJSON = JSON.parse(infoStrings);
-				for ( var i in infoJSON) {
-					this.set(i, infoJSON[i]);
+		if (fs.existsSync(this.path)) {
+			if (fs.existsSync(this.info)) {
+				infoStrings = fs.readFileSync(this.info, configs.encode);
+				try {
+					var infoJSON = JSON.parse(infoStrings);
+					for ( var i in infoJSON) {
+						this.set(i, infoJSON[i]);
+					}
+				} catch (err) {
 				}
-			} catch (err) {
 			}
-		}
-		this.files = [];
-		var files = fs.readdirSync(this.path);
-		for ( var i = 0; i < files.length; i++) {
-			if (files[i] !== configs.folders.info) {
-				this.files.push (new Files ({name: files[i]}));
+			this.files = [];
+			var files = fs.readdirSync(this.path);
+			for ( var i = 0; i < files.length; i++) {
+				if (files[i] !== configs.folders.info) {
+					this.files.push (new Files ({name: files[i]}));
+				}
 			}
+			this.files.sort(fSort);
 		}
 		return this;
 	}
 });
 
 FoldersSchema.pre('save', function(next) {
-	this.files.sort(fSort);
 	this.make();
 	var infoJSON = JSON.stringify(this.toJSON());
-	return fs.writeFile(this.info, infoJSON, configs.encode, function() {
-		return typeof next === "function" ? next() : void 0;
+	fs.writeFile(this.info, infoJSON, configs.encode, function() {
+		if (typeof next === "function") next();
 	});
 });
 
 FoldersSchema.pre('remove', function(next) {
-	var ret;
 	if (this.exists()) {
 		if (this.info.exists()) {
 			fs.unlinkSync(this.info.path);
 		}
-		ret = fs.rmdirSync(this.path);
+		fs.rmdirSync(this.path);
 	}
 	typeof next === "function" ? next() : void 0;
 });
@@ -104,12 +111,17 @@ Files = mongoose.model('Files', FilesSchema);
 
 Folders = mongoose.model('Folders', FoldersSchema);
 
-var f = function(name) {
-	var folder = new Folders({
-		name : path.basename(name)
+var f = function(name, next) {
+	Folders.findOne ({name: name}, function (err,data) {
+		if (data) {
+			next (data);
+		} else {
+			var folder = new Folders({
+				name : path.basename(name)
+			});
+			next (folder.sync());
+		}
 	});
-	folder.sync();
-	return folder;
 };
 
 var fSort = function(a, b) {
