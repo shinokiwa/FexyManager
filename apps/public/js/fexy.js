@@ -6,41 +6,74 @@ $.fn.close = function() {
 };
 
 var m = {
-	views : {
-		_v : {},
-		get : function(i) {
-			return (this._v[i] !== undefined) ? this._v[i] : void 0;
-		},
-		build : function() {
+	views : (function() {
+		var v = {
+			view : null,
+			folder : null,
+			file : null
+		};
+		var r = function(i) {
+			return (v[i] !== undefined) ? v[i] : void 0;
+		};
+		r.reload = function() {
 			var hash = location.hash.split('/');
-			this._v.view = (hash[0]) ? hash[0] : '#Index';
-			this._v.folder = (hash[1] !== undefined) ? hash[1] : null;
-			this._v.file = (hash[2] !== undefined) ? hash[2] : null;
-			return this;
-		}
+			v.view = (hash[0]) ? hash[0] : '#Index';
+			v.folder = (hash[1] !== undefined) ? hash[1] : null;
+			v.file = (hash[2] !== undefined) ? hash[2] : null;
+		};
+		return r;
+	})(),
+	hash : function() {
+		return '#' + Array.prototype.slice.apply(arguments).join('/');
 	},
-
-	details : {
-		_data : {},
-		_name : '',
-		read : function(fn) {
-			if (this._data && this._name === m.views.get('folder')) {
-				fn(this._data);
+	folders : (function() {
+		var list = {};
+		var conditions = null;
+		var f = function(fn) {
+			if (conditions == null) {
+				m.folders.search({}, fn);
 			} else {
-				this._name = m.views.get('folder');
+				fn(list);
+			}
+		};
+		f.search = function(c, fn) {
+			$.ajax('./folder/search.json', {
+				data : c,
+			}).done(function(res) {
+				list = res.data;
+				fn(list);
+			});
+		};
+
+		return f;
+	})(),
+
+	details : (function() {
+		var data = {};
+		var name = '';
+		var d = function(fn) {
+			if (data && name === m.views('folder')) {
+				fn(data);
+			} else {
+				name = m.views('folder');
 				$.ajax('/folder/get.json', {
 					data : {
-						'name' : this._name
+						'name' : name
 					}
 				}).done(function(res) {
-					m.details._data = res.data;
-					fn(m.details._data);
+					data = res.data;
+					fn(data);
 				}).fail(function(res) {
 					location.hash = '';
 				});
 			}
-		}
 
+		};
+
+		return d;
+	})(),
+	fulls : {
+		now : 0
 	}
 };
 
@@ -65,8 +98,8 @@ $(document).ready(function() {
 	$(window).bind({
 		'hashchange' : function(e) {
 			$('.view:visible').hide();
-			m.views.build();
-			$(m.views.get('view')).open();
+			m.views.reload();
+			$(m.views('view')).open();
 		}
 	});
 
@@ -114,77 +147,60 @@ $(document).ready(function() {
 	$('#Search').bind({
 		'submit' : function(e) {
 			e.preventDefault();
-			$.ajax({
-				url : '/folder/search.json'
-			}).done(function(res) {
-				$('#Index').data('list', res.data).change();
-				$('#Index:hidden, #Navi:hidden').open();
+			m.folders.search($(this).serialize(), function() {
+				$('#Index').open();
 			});
 		}
 	});
 
 	$('#Index').bind({
 		'open' : function(e) {
-			$(this).show(0, function() {
-				if ($(this).children('.media:visible').size() == 0) {
-					$('#Search').submit();
-				} else {
-					$('#Navi:hidden').open();
-				}
+			m.folders(function(list) {
+				$('#Index .media:visible').remove();
+				$('#Navi:hidden').open();
+				$('#Index:hidden').show();
+				$(list).each(function(i, v) {
+					var $media = $('#Index .media:first-child').clone().data(v);
+					var $mediaData = $media.contents().children('.mediaData');
+					$mediaData.filter('[data-src=name]').text(v.name);
+					$('#Index .media-list').append($media);
+					$media.show();
+				});
 			});
-		},
-		'change' : function() {
-			$('#Index .media:visible').remove();
-			var data = $(this).data('list') || [];
-			for ( var i = 0; i < data.length; i++) {
-				var $media = $('#Index .media:first-child').clone();
-				var $mediaData = $media.contents().children('.mediaData');
-				$media.data(data[i]);
-				$mediaData.filter('[data-src=name]').text(data[i].name);
-				$('#Index .media-list').append($media);
-				$media.show();
-			}
 		},
 		'close' : function() {
 			$(this).hide();
 		}
 	}).on('click', ".media-list .media", function(e) {
 		e.preventDefault();
-		location.hash = 'Detail/' + $(this).data('name');
+		location.hash = m.hash('Detail', $(this).data('name'));
 	});
 
 	$('#Detail').bind({
 		'open' : function(e) {
-			$('#Detail').change().show(0, function() {
-				$('#Navi:hidden').open();
-			});
-		},
-		'close' : function() {
-			$(this).hide();
-		},
-		'change' : function(e) {
-			e.preventDefault();
-			m.details.read(function(data) {
+			m.details(function(data) {
 				var $mediaData = $('#Detail .mediaData');
 				$mediaData.filter('[data-src=name]').text(data.name);
 				var $fileList = $('#Detail .files .file-list');
 				$fileList.children(':gt(0)').remove();
 				for ( var i = 0; i < data.files.length; i++) {
-					var $file = $fileList.children('.file-list *:first-child')
-						.clone();
+					var $file = $fileList.children('.file-list *:first-child').clone();
 					var $fileData = $file.contents().filter('.fileData');
-					$fileData.filter('[data-src=name]')
-						.text(data.files[i].name);
+					$fileData.filter('[data-src=name]').text(data.files[i].name);
 					$fileList.append($file);
 					$file.show();
 				}
+				$('#Detail').show();
+				$('#Navi:hidden').open();
 			});
+		},
+		'close' : function() {
+			$(this).hide();
 		}
 	}).on('click', '.fullView', function(e) {
 		e.preventDefault();
-		m.details.read(function(data) {
-			console.log (data);
-			location.hash = 'Full/' + data.name + '/' + data.files[0].name;
+		m.details(function(data) {
+			location.hash = m.hash('Full', data.name, data.files[0].name);
 		});
 	}).on('click', '.sync', function(e) {
 		e.preventDefault();
@@ -201,29 +217,25 @@ $(document).ready(function() {
 	});
 
 	$('#Full').bind({
-		'open' : function(e, data) {
+		'open' : function(e) {
 			$('#Navi:visible').close();
-			m.details.read(function(data) {
-				for (var i=0;i < data.files.length; i++) {
-					if (data.files[i].name === m.views.get('file')) {
-						break;
-					}
-				}
-				if (data.files[i-1]) {
-					$('#Full .controlls .btnPrev').removeClass('disabled').attr('href', '#Full/'+m.views.get('folder') + '/' + data.files[i-1].name);
+			m.details(function(data) {
+				$(data.files).each (function (i,v){
+					if (v.name === m.views('file')) m.fulls.now = i;
+				});
+				if (data.files[m.fulls.now - 1]) {
+					$('#Full .controlls .btnPrev').removeClass('disabled').attr('href', m.hash('Full', m.views('folder'), data.files[m.fulls.now - 1].name));
 				} else {
 					$('#Full .controlls .btnPrev').addClass('disabled').attr('href', location.hash);
 				}
-				$('#Full .controlls .btnBack').attr('href', '#Detail/'+ m.views.get('folder'));
-				if (data.files[i+1]) {
-					$('#Full .controlls .btnNext').removeClass('disabled').attr('href', '#Full/'+m.views.get('folder') + '/' + data.files[i+1].name);
+				$('#Full .controlls .btnBack').attr('href', m.hash('Detail', m.views('folder')));
+				if (data.files[m.fulls.now + 1]) {
+					$('#Full .controlls .btnNext').removeClass('disabled').attr('href', m.hash('Full', m.views('folder'), data.files[m.fulls.now + 1].name));
 				} else {
 					$('#Full .controlls .btnNext').addClass('disabled').attr('href', location.hash);
 				}
 			});
-			$('#Full .contents').html('<a href="#"><img src="/folder/view/'
-				+ m.views.get('folder') + '/' + m.views.get('file')
-				+ '" /></a>');
+			$('#Full .contents').html('<img src="/folder/view/' + m.views('folder') + '/' + m.views('file') + '" />');
 			$(this).show(0);
 		},
 		'close' : function() {
