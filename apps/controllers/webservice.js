@@ -2,12 +2,13 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var routes = require('../routes');
-var log = require('../controllers').log;
+var log = require('../utils').log;
+var models = require ('../models');
 var app = express();
 
-module.exports.start = function () {
+module.exports.start = function (next) {
 	app.configure(function() {
-		app.set('port', process.env.PORT || 80);
+		app.set('port', models.configs.webservice.listen || 80);
 		app.set('views', path.join(__dirname, '../views'));
 		app.set('view engine', 'jade');
 		app.use(express.favicon());
@@ -24,6 +25,6 @@ module.exports.start = function () {
 	routes(app);
 
 	http.createServer(app).listen(app.get('port'), function() {
-		log.debug ("[WebService]Express server listening on port " + (app.get('port')));
+		next (null, "[WebService]Express server listening on port " + (app.get('port')));
 	});
-}
+};

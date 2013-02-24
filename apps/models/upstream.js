@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var models = require('./index');
-var log = require('../controllers').log;
+var log = require('../utils').log;
 var d = require('domain').create();
 
 d.on('error', function(e) {

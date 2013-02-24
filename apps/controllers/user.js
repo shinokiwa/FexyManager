@@ -1,5 +1,5 @@
 var Users = require ('../models').users;
-var log = require ('./log');
+var log = require ('../utils/log');
 var crypto = require('crypto');
 
 module.exports.login = function(name, pass, next) {

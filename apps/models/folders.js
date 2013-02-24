@@ -1,10 +1,10 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = mongoose.Types.ObjectId;
-var models = require('./index');
+var utils = require('../utils');
 var fs = require('fs');
 var path = require('path');
-var configs = models.configs;
+var configs = require ('../configs');
 
 FilesSchema = new Schema({
 	name : {
@@ -44,8 +44,7 @@ FoldersSchema.virtual('path').get(function() {
 	if (this.name == null) {
 		return false;
 	} else {
-		var block = models.blocks(this.name);
-		return path.join(block.path, this.name);
+		return utils.pf.path(configs.folders.root, utils.pf.getBlock(this.name), this.name);
 	}
 });
 
@@ -56,13 +55,6 @@ FoldersSchema.virtual('info').get(function() {
 FoldersSchema.method({
 	exists : function() {
 		return fs.existsSync(this.path);
-	},
-	make : function() {
-		if (!this.exists()) {
-			models.blocks(this.name).make();
-			fs.mkdirSync(this.path);
-			fs.chmodSync(this.path, 0x1ff);
-		}
 	},
 	sync : function() {
 		if (fs.existsSync(this.path)) {
@@ -90,7 +82,6 @@ FoldersSchema.method({
 });
 
 FoldersSchema.pre('save', function(next) {
-	this.make();
 	var infoJSON = JSON.stringify(this.toJSON());
 	fs.writeFile(this.info, infoJSON, configs.encode, function() {
 		if (typeof next === "function") next();
@@ -99,7 +90,7 @@ FoldersSchema.pre('save', function(next) {
 
 FoldersSchema.pre('remove', function(next) {
 	if (this.exists()) {
-		if (this.info.exists()) {
+		if (fs.existsSync(this.info)) {
 			fs.unlinkSync(this.info.path);
 		}
 		fs.rmdirSync(this.path);
@@ -114,12 +105,12 @@ Folders = mongoose.model('Folders', FoldersSchema);
 var f = function(name, next) {
 	Folders.findOne ({name: name}, function (err,data) {
 		if (data) {
-			next (data);
+			next (null, data);
 		} else {
 			var folder = new Folders({
 				name : path.basename(name)
 			});
-			next (folder.sync());
+			next (null, folder.sync());
 		}
 	});
 };

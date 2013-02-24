@@ -1,4 +1,4 @@
-var configs = require('../models/configs');
+var configs = require('../configs');
 var fs = require ('fs');
 
 function write () {

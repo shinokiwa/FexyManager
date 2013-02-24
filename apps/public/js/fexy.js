@@ -27,13 +27,13 @@ var m = {
 		return '#' + Array.prototype.slice.apply(arguments).join('/');
 	},
 	folders : (function() {
-		var list = {};
+		var list = [];
 		var conditions = null;
 		var f = function(fn) {
-			if (conditions == null) {
-				m.folders.search({}, fn);
+			if (list.length) {
+				fn(false, list);
 			} else {
-				fn(list);
+				m.folders.search(conditions, fn);
 			}
 		};
 		f.search = function(c, fn) {
@@ -41,12 +41,13 @@ var m = {
 				data : c,
 			}).done(function(res) {
 				list = res.data;
-				fn(list);
+				fn(true, list);
 			});
 		};
 
 		return f;
 	})(),
+	scroll: 0,
 
 	details : (function() {
 		var data = {};
@@ -155,17 +156,20 @@ $(document).ready(function() {
 
 	$('#Index').bind({
 		'open' : function(e) {
-			m.folders(function(list) {
-				$('#Index .media:visible').remove();
+			m.folders(function(isChange, list) {
+				if (isChange) {
+					$('#Index .media:gt(0)').remove();
+					$(list).each(function(i, v) {
+						var $media = $('#Index .media:first-child').clone().data(v);
+						var $mediaData = $media.contents().children('.mediaData');
+						$mediaData.filter('[data-src=name]').text(v.name);
+						$('#Index .media-list').append($media);
+						$media.show();
+					});
+				}
 				$('#Navi:hidden').open();
 				$('#Index:hidden').show();
-				$(list).each(function(i, v) {
-					var $media = $('#Index .media:first-child').clone().data(v);
-					var $mediaData = $media.contents().children('.mediaData');
-					$mediaData.filter('[data-src=name]').text(v.name);
-					$('#Index .media-list').append($media);
-					$media.show();
-				});
+				$(window).scrollTop(m.scroll);
 			});
 		},
 		'close' : function() {
@@ -173,6 +177,7 @@ $(document).ready(function() {
 		}
 	}).on('click', ".media-list .media", function(e) {
 		e.preventDefault();
+		m.scroll = $(window).scrollTop();
 		location.hash = m.hash('Detail', $(this).data('name'));
 	});
 

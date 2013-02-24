@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var models = require('./index');
-var log = require('../controllers').log
+var log = require('../utils').log;
 var d = require('domain').create();
 
 d.on('error', function(e) {
@@ -48,16 +48,15 @@ var resources = function(src, next) {
 						});
 					});
 				});
-			})
+			});
 		},
 		toUpstream : function() {
 			var r = this;
-			if (this.exists()) {
+			this.exists(function () {
 				var basename = path.basename(r.path);
 				fs.renameSync(r.path, path.join(models.upstream.path, basename));
 				log.info('Resource '+ r.path + ' to Upstream.');
-			}
-			return this;
+			});
 		}
 	});
 };

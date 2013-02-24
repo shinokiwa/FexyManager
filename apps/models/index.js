@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
-var configs = require ('./configs');
-var log= require ('../controllers').log;
+var configs = require ('../configs');
+var log= require ('../utils').log;
 
 log.debug("[models]Connect to mongoDB. : "+ configs.dbs.connection);
 mongoose.connect(configs.dbs.connection);

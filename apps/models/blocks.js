@@ -1,78 +1,52 @@
 var fs = require('fs');
-var path = require('path');
-var async = require('async');
 var models = require('./index');
 var d = require('domain').create();
+var utils = require('../utils');
 
 d.on('error', function(e) {
-	require('../controllers/log').fatal("[model.blocks]", e.message, e.stack);
+	require('../utils').log.fatal("[model.blocks]", e.message, e.stack);
 	return false;
 });
 
-blocks = function(name) {
-	models.resources(path.join(models.root.path, name), function (resource) {
-		resource.exists(function (r) {
-			resource.isDirectory(function (resource) {
+module.exports = function(name, callback) {
+	models.resources(utils.pf.path(models.root.path, name), function(resource) {
+		resource.exists(function(r) {
+			resource.isDirectory(function(resource) {
 				if (name.length > 1 || fs.readdirSync(resource.path).length < 1) {
 					resource.toUpstream();
 				}
-			}, function () {
+			}, function() {
 				resource.toUpstream();
 			});
 		});
 	});
-	
-	var blockName = name.match(/[^. \/]/)[0];
 
-	var b = {
-		path : path.join(models.root.path, blockName),
-		exists : function() {
-			return fs.existsSync(this.path);
-		},
-		count : function() {
-			if (this.exists()) {
-				return fs.readdirSync(this.path).length;
-			} else {
-				return 0;
-			}
-		},
-		make : function() {
-			if (!b.exists()) {
-				fs.mkdirSync(b.path);
-				fs.chmodSync(b.path, 0x1ff);
-			}
-		},
-		folders : function(fn, next) {
-			var tasks;
-			if (b.exists()) {
-				tasks = [];
-				return fs.readdir(b.path, function(err, folders) {
-					var folder, _i, _len;
-					for (_i = 0, _len = folders.length; _i < _len; _i++) {
-						folder = folders[_i];
-						tasks.push(prs(folder, fn));
-					}
-					return async.parallel(tasks, function(err, results) {
-						return typeof next === "function" ? next(null, results)
-								: void 0;
-					});
+	var blockName = utils.pf.getBlock(name);
+
+	if (typeof callback === 'function') {
+		callback(null, {
+			path : utils.pf.path(models.root.path, blockName),
+			exists : function(callback) {
+				var r = this;
+				fs.exists(this.path, function(exists) {
+					if (exists)
+						callback(r);
 				});
+			},
+			make : function() {
+				this.exists(function() {
+					fs.mkdirSync(b.path);
+					fs.chmodSync(b.path, 0x1ff);
+				});
+			},
+			folders : function(filter, callback) {
+				utils.pf.processAll(this.path, function(f, next) {
+
+					models.folders(f, function(err, data) {
+						filter(data, next);
+					});
+				}, callback);
 			}
-		}
+		});
 	}
-
-	return b;
 };
-
-prs = function(name, fn) {
-	return function(next) {
-		var folder;
-		folder = models.folders(name);
-		if (folder) {
-			return fn(folder, next);
-		} else {
-			return typeof next === "function" ? next() : void 0;
-		}
-	};
-};
-module.exports = blocks;

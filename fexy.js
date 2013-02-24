@@ -1,7 +1,7 @@
 var path = require ('path');
 var fs = require ('fs');
 var exec = require ('child_process').exec;
-var configs = require ('./conf/fexy.conf.js');
+var configs = require ('./apps/configs');
 var controllers = require ('./apps/controllers');
 var d = require ('domain').create();
 
@@ -22,13 +22,15 @@ d.run (function () {
 	process.umask(0);
 	var c = {
 		start: function () {
-			controllers.webservice.start()
+			controllers.webservice.start(function (err, msg) {
+				process.stdout.write (msg + "\n");
+			});
 		},
 		sync: function () {
 			
 		},
 		"create-user": function () {
-			controllers.user.create(process.argv[3], process.argv[4], complete)
+			controllers.user.create(process.argv[3], process.argv[4], complete);
 		},
 		"upstream": function () {
 			controllers.upstream.upload(complete);

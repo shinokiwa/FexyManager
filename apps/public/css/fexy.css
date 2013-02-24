@@ -71,3 +71,9 @@ header {
   background-color: #fff;
 }
 /** Full **/
+#Full .controlls {
+  position: fixed;
+  bottom: 30px;
+  width: 100%;
+  text-align: center;
+}

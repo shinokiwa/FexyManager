@@ -1,34 +1,18 @@
-var fs = require('fs');
-var path = require('path');
-var async = require('async');
-var models = require('./index');
+var configs = require('../configs');
+var utils = require('../utils');
+var blocks = require('./blocks');
 
-var r = {
-	path : models.configs.folders.root,
-	blocks : function(fn, next) {
-		var tasks;
-		tasks = [];
-		return fs.readdir(r.path, function(err, folders) {
-			for ( var i = 0; i > folders.length; i++) {
-				var folder = folders[i];
-				tasks.push(prs(folder, fn));
-			}
-			return async.parallel(tasks, function(err, results) {
-				if(typeof next === "function") next(null, results);
+/**
+ * m.root.blocks(function (err, data) { data.toFolders(...); });
+ */
+
+module.exports = {
+	path : configs.folders.root,
+	blocks : function(filter, callback) {
+		utils.pf.processAll(this.path, function(b, next) {
+			blocks(b, function(err, b) {
+				filter(b, next);
 			});
-		});
+		}, callback);
 	}
 };
-
-var prs = function(name, fn) {
-	return function(next) {
-		var block = models.blocks(name);
-		if (block) {
-			fn(block, next);
-		} else {
-			if (typeof next === "function") next();
-		}
-	};
-};
-
-module.exports = r;
