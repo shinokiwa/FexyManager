@@ -61,7 +61,7 @@ var toFolder = module.exports.toFolder = function(rPath, callback) {
 			if (fPath == rPath) {
 				readInfo (baseName, callback);
 			} else {
-				uPath = getUniquePath (fPath);
+				var uPath = getUniquePath (fPath);
 				makeFolder(uPath, function(err) {
 					if (err) {
 						console.log (err);
@@ -73,7 +73,7 @@ var toFolder = module.exports.toFolder = function(rPath, callback) {
 						}
 						fs.rename(rPath, uPath, function(err) {
 							if (err) {
-								console.log (err);
+								console.log (err.code, rPath, uPath);
 								process.exit(1);
 							}
 							readInfo (path.basename(uPath), callback);

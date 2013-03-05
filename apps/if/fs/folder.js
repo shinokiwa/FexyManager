@@ -41,7 +41,7 @@ var f = module.exports = {
 				for ( var i = 0; i < data.files.length; i++) {
 					file = data.files[i];
 					if (file.name === fileName) {
-						ret = path.join(data.path, file.name);
+						ret = pf.path(pf.getPath(data.name), file.name);
 						break;
 					}
 				}
