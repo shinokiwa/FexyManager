@@ -2,11 +2,10 @@ var path = require ('path');
 var fs = require ('fs');
 var exec = require ('child_process').exec;
 var configs = require ('./apps/configs');
-var controllers = require ('./apps/controllers');
 var d = require ('domain').create();
 
 d.on ('error', function (e) {
-	require ('./apps/controllers/log').fatal ("[Uncaught Exception]", e.message, e.stack);
+	require ('./apps/log').fatal ("[Uncaught Exception]", e.message, e.stack);
 	process.stdout.write ("[Uncaught Exception]"+e.message+"\n"+e.stack);
 	process.stdout.write ("\n");
 	process.exit(1);
@@ -22,7 +21,7 @@ d.run (function () {
 	process.umask(0);
 	var c = {
 		start: function () {
-			controllers.webservice.start(function (err, msg) {
+			require('./apps/sv/web').start(function (err, msg) {
 				process.stdout.write (msg + "\n");
 			});
 		},
