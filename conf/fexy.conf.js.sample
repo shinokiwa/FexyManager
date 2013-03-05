@@ -1,5 +1,7 @@
 module.exports = {
-
+	"webservice": {
+		"listen": 8000
+	},
 	"folders": {
 		"root": __dirname+"/../folders/",
 		"upstream": __dirname+"/../upstream/",
