@@ -12,7 +12,7 @@ module.exports.start = function (next) {
 		app.set('views', path.join(__dirname, './views'));
 		app.set('view engine', 'jade');
 		app.use(express.favicon());
-		app.use(express.logger({"stream": log.access}));
+//		app.use(express.logger({"stream": log.access}));
 		app.use(express.bodyParser());
 		app.use(express.methodOverride());
 		app.use(express.cookieParser('your secret here'));

@@ -4,32 +4,6 @@
 var pf = require ('./pf');
 var configs = require ('../../configs');
 var fs = require ('fs');
-var filesSchema = require ('./schemas/filesSchema');
-
-function fSort (a, b) {
-	if (a.name > b.name) {
-		return 1;
-	}
-	if (a.name < b.name) {
-		return -1;
-	}
-	return 0;
-};
-
-function getFiles (folderPath, info, callback) {
-	info.files = [];
-	fs.readdir(folderPath, function (err, files) {
-		if (!err) {
-			for ( var i = 0; i < files.length; i++) {
-				if (files[i] !== configs.folders.info) {
-					info.files.push (new filesSchema ({name: files[i]}));
-				}
-			}
-			info.files.sort(fSort);
-		}
-		callback (err, null, info);
-	});
-};
 
 var read = module.exports.read = function (name, callback) {
 	var folderPath = pf.getPath(name);
@@ -45,10 +19,10 @@ var read = module.exports.read = function (name, callback) {
 					} catch (err) {
 					}
 				}
-				getFiles (folderPath, info, callback);
+				callback (null, null, info);
 			});
 		} else {
-			getFiles (folderPath, info, callback);
+			callback (null, null, info);
 		}
 	});
 };

@@ -1,6 +1,6 @@
 var Folders = require('./schemas/foldersSchema');
 var pf = require('./pf');
-var info = require('./info');
+var resource = require('./resource');
 
 var f = module.exports = {
 	find : function(conditions, callback) {
@@ -18,20 +18,16 @@ var f = module.exports = {
 		});
 	},
 	sync : function(name, callback) {
-		info.read(name, function(errInfo, msgInfo, data) {
-			f.get (name, function (errGet, msgGet, folder) {
-				if (errGet) {
-					callback (errGet, msgGet, folder);
-				} else if (errInfo && errInfo.code=="ENOENT") {
-					folder.remove (function () {
-						callback (errInfo, msgInfo || msgGet, {});
-					});
-				} else {
-					folder.set (data).save(function () {
-						callback (null, msgInfo || msgGet, folder);
-					});
-				}
-			});
+		resource.toFolder(name, function(err, msg, folder) {
+			if (err && err.code == "ENOENT") {
+				folder.remove(function() {
+					callback(err, msg, {});
+				});
+			} else {
+				folder.save(function() {
+					callback(null, msg, folder);
+				});
+			}
 		});
 	},
 	view : function(folderName, fileName, next) {

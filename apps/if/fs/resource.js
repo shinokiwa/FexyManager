@@ -6,6 +6,9 @@ var fs = require('fs');
 var path = require('path');
 var info = require('./info');
 var folders = require ('./schemas/foldersSchema');
+var filesSchema = require ('./schemas/filesSchema');
+var configs = require ('../../configs');
+var mime = require ('mime');
 
 function makeFolder(fPath, callback) {
 	var parent = path.dirname(fPath);
@@ -48,7 +51,7 @@ function readInfo (baseName, callback) {
 			} else {
 				f = new folders (data);
 			}
-			callback (err, msg, f);
+			filelist (f, callback);
 		});
 	});
 }
@@ -86,12 +89,59 @@ var toFolder = module.exports.toFolder = function(rPath, callback) {
 	});
 };
 
-var toUpstream = module.exports.toUpstream = function(rPath, callback) {
-	fs.exists(rPath, function() {
-		var baseName = path.basename(rPath);
-		var uPath = getUniquePath (path.join(configs.folders.upstream, baseName));
-		fs.rename(rPath, uPath, function (err) {
-			calback (err, null, null);
+var listObject = function () {
+	this._list = {};
+	this.push = function (filePath) {
+		this._list[filePath] = new filesSchema ({
+			name: path.basename (filePath),
+			path: filePath,
+			type: mime.lookup(filePath)
 		});
+	};
+	this.update = function (filePath) {
+		if (this._list[filePath] !== undefined) {
+			this.push(filePath);
+		}
+	};
+	this.toArray = function (){
+		var arr = [];
+		for (var i in this._list) {
+			arr.push(this._list[i]);
+		}
+		arr.sort(fSort);
+		return arr;
+	};
+	
+	return this;
+};
+
+function fSort (a, b) {
+	if (a.name > b.name) {
+		return 1;
+	}
+	if (a.name < b.name) {
+		return -1;
+	}
+	return 0;
+};
+
+function filelist (folder, callback) {
+	var folderPath = pf.getPath (folder.name);
+	fs.readdir(folderPath, function (err, files) {
+		var list = new listObject ();
+		if (!err) {
+			for ( var i = 0; i < files.length; i++) {
+				if (files[i] !== configs.folders.info) {
+					list.push (pf.path(folderPath, files[i]));
+				};
+			}
+			for ( var i = 0; i < folder.files.length; i++) {
+				if (folder.files[i].name !== configs.folders.info) {
+					list.update (folder.files[i].path);
+				};
+			}
+			folder.files = list.toArray();
+		}
+		callback (err, null, folder);
 	});
 };

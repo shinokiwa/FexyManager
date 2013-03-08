@@ -2,7 +2,7 @@
  * Physical Folders Utilities
  */
 var fs = require('fs');
-var path = require('path');
+var pt = require('path');
 var async = require('async');
 var configs = require ('../../configs');
 
@@ -11,7 +11,7 @@ module.exports.processAll = function(root, filter, callback) {
 		var folders = new Array();
 		for (var i=0;i<data.length;i++) {
 			if (data[i] != '.' && data[i] != '..') {
-				folders.push (data[i]);
+				folders.push (pt.join(root, data[i]));
 			}
 		}
 		async.filter(folders, filter, function(data) {
@@ -22,7 +22,7 @@ module.exports.processAll = function(root, filter, callback) {
 };
 
 module.exports.path = function () {
-	return path.join.apply (path, arguments);
+	return pt.join.apply (pt, arguments);
 };
 
 var exists = module.exports.exists = function (name, callback) {
@@ -34,5 +34,11 @@ var getBlock = module.exports.getBlock = function (name) {
 };
 
 var getPath = module.exports.getPath = function (name) {
-	return path.join (configs.folders.root, getBlock(name), name);
+	return pt.join (configs.folders.root, getBlock(name), name);
 };
+
+var exStat = module.exports.exStat = function (path, callback) {
+	fs.stat (path, callback);
+};
+
+var baseName = module.exports.baseName = pt.basename;
