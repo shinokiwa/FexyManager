@@ -1,10 +1,10 @@
-var fs = require('../../../if/fs');
+var fs = require('../../../if/folder');
 var path = require('path');
 
 module.exports.index = function(utils) {
 	return [utils.useJSON, utils.auth, function(req, res) {
 		res.set('cache-control', 'no-cache');
-		fs.upstream.upload (function(err, msg, data) {
+		fs.upstream (function(err, msg, data) {
 			res.locals.set({
 				err: err,
 				message: msg,

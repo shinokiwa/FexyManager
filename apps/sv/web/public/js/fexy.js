@@ -174,8 +174,11 @@ $(document).ready(function() {
 					$('#Index .media:gt(0)').remove();
 					$(list).each(function(i, v) {
 						var $media = $('#Index .media:first-child').clone().data(v);
-						var $mediaData = $media.contents().children('.mediaData');
+						var $mediaData = $media.find('.mediaData');
 						$mediaData.filter('[data-src=name]').text(v.name);
+						if (v.thumbnail_s) {
+							$mediaData.filter('[data-src=thumbnail_s]').attr('src', v.thumbnail_s);
+						}
 						$('#Index .media-list').append($media);
 						$media.show();
 					});

@@ -11,6 +11,8 @@ FoldersSchema = new Schema({
 			unique : true
 		}
 	},
+	thumbnail_m: String,
+	thumbnail_s: String,
 	files : [ FilesSchema.schema ],
 	createdUser : String,
 	createdDate : {
