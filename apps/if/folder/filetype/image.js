@@ -10,13 +10,16 @@ module.exports = function(file) {
 			height : 64,
 			width : 64
 		}, function(err, stdout, stderr) {
-			if (err)
-				throw err;
-			var bytes = [];
-			for ( var i = 0; i < stdout.length; i++)
-				bytes[i] = stdout.charCodeAt(i) & 0xff;
-			var ts = 'data:' + file.type + ';base64,' + (new Buffer(bytes).toString('base64'));
-			callback('', ts);
+			if (err) {
+				console.log(err);
+				callback('', '');
+			} else {
+				var bytes = [];
+				for ( var i = 0; i < stdout.length; i++)
+					bytes[i] = stdout.charCodeAt(i) & 0xff;
+				var ts = 'data:' + file.type + ';base64,' + (new Buffer(bytes).toString('base64'));
+				callback('', ts);
+			}
 		});
 	};
 	return image;
