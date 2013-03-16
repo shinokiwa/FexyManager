@@ -8,7 +8,7 @@ var fs = require ('fs');
 var read = module.exports.read = function (name, callback) {
 	var folderPath = pf.getPath(name);
 	var infoPath = pf.path(folderPath, configs.folders.info);
-	var info = {name: name};
+	var info = {name: name, files:new Array()};
 	fs.exists(infoPath, function (exists) {
 		if (exists) {
 			fs.readFile (infoPath, configs.encode, function (err, data) {

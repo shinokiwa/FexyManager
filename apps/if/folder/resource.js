@@ -36,15 +36,13 @@ var resource = module.exports = function (path, callback) {
 					_err(err.message);
 				} else {
 					var list = new listObject ();
-					if (!err) {
-						for ( var i = 0; i < files.length; i++) {
-							list.push (files[i]);
-						}
-						for ( var i = 0; i < folderInfo.files.length; i++) {
-							list.update (folderInfo.files[i].path);
-						}
-						folderInfo.files = list.toArray();
+					for ( var i = 0; i < files.length; i++) {
+						list.push (files[i]);
 					}
+					for ( var i = 0; i < folderInfo.files.length; i++) {
+						list.update (folderInfo.files[i].path);
+					}
+					folderInfo.files = list.toArray();
 					folders.findOne ({name: folderInfo.name}, function (err, folder) {
 						_save (folder, folderInfo);
 					});
