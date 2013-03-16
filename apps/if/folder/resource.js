@@ -55,7 +55,7 @@ var resource = module.exports = function (path, callback) {
 	
 	var _rename = function (folderPath,baseName,stat) {
 		if (stat.isFile()) {
-			folderPath = path.join (folderPath, baseName);
+			folderPath = pf.path (folderPath, baseName);
 		}
 		pf.rename(path, folderPath, function(err) {
 			_read (baseName, folderPath);
