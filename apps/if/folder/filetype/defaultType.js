@@ -1,6 +1,5 @@
 var df = module.exports = function () {
-	this.thumbnail = function (callback) {
-		callback ('', '');
+	this.thumbnail = function () {
 	};
 	return this;
 };
