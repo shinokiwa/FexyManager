@@ -54,10 +54,13 @@ var resource = module.exports = function (path, callback) {
 	};
 	
 	var _rename = function (folderPath,baseName,stat) {
+		var dstPath;
 		if (stat.isFile()) {
-			folderPath = pf.path (folderPath, baseName);
+			dstPath = pf.path (folderPath, baseName);
+		} else {
+			dstPath = folderPath;
 		}
-		pf.rename(path, folderPath, function(err) {
+		pf.rename(path, dstPath, function(err) {
 			_read (baseName, folderPath);
 		});
 	};

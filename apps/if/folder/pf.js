@@ -92,15 +92,19 @@ var exmkDir = module.exports.exmkDir = function(path, callback) {
 };
 
 var exReadDir = module.exports.exReadDir = function (path, callback) {
-	console.log (path);
 	fs.readdir(path, function (err, data) {
-		var files = new Array();
-		for (var i =0; i< data.length; i++) {
-			if (data[i] !== configs.folders.info) {
-				files.push (pt.join(path, data[i]));
-			};
+		if (err) {
+			console.log (err);
+			callback (err, []);
+		} else {
+			var files = new Array();
+			for (var i =0; i< data.length; i++) {
+				if (data[i] !== configs.folders.info) {
+					files.push (pt.join(path, data[i]));
+				};
+			}
+			callback (null, files);
 		}
-		callback (null, files);
 	});
 };
 
