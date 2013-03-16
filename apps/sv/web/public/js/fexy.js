@@ -202,11 +202,14 @@ $(document).ready(function() {
 			m.details(function(data) {
 				var $mediaData = $('#Detail .mediaData');
 				$mediaData.filter('[data-src=name]').text(data.name);
+				if (data.thumbnail_m) {
+					$mediaData.filter('[data-src=thumbnail_m]').attr('src', data.thumbnail_m);
+				}
 				var $fileList = $('#Detail .files .file-list');
 				$fileList.children(':gt(0)').remove();
 				for ( var i = 0; i < data.files.length; i++) {
 					var $file = $fileList.children('.file-list *:first-child').clone();
-					var $fileData = $file.contents().filter('.fileData');
+					var $fileData = $file.find('.fileData');
 					$fileData.filter('[data-src=name]').text(data.files[i].name);
 					$fileList.append($file);
 					$file.show();

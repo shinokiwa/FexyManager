@@ -1,26 +1,40 @@
 var defaultType = require('./defaultType');
 var im = require('imagemagick');
 var fs = require('fs');
+var folders = require('../schemas/foldersSchema');
 
-module.exports = function(file) {
+module.exports = function() {
 	var image = new defaultType();
-	image.thumbnail = function(callback) {
-		im.resize({
-			srcPath : file.path,
-			height : 64,
-			width : 64
-		}, function(err, stdout, stderr) {
-			if (err) {
-				console.log(err);
-				callback('', '');
-			} else {
-				var bytes = [];
-				for ( var i = 0; i < stdout.length; i++)
-					bytes[i] = stdout.charCodeAt(i) & 0xff;
-				var ts = 'data:' + file.type + ';base64,' + (new Buffer(bytes).toString('base64'));
-				callback('', ts);
-			}
+	image.thumbnail = function(folderName, file) {
+		var create = function(size, callback) {
+			im.resize({
+				srcPath : file.path,
+				height : size,
+				width : size
+			}, function(err, stdout, stderr) {
+				if (err) {
+					console.log(err);
+					callback('');
+				} else {
+					callback(stdout);
+				}
+			});
+		};
+
+		create(64, function(sData) {
+			create(140, function(mData) {
+				folders.update({
+					name : folderName
+				}, {
+					thumbnail_s : defaultType.toDataSchema(sData, file.type),
+					thumbnail_m : defaultType.toDataSchema(mData, file.type),
+				}, function(err) {
+					if (err)
+						console.log(err);
+				});
+			});
 		});
+
 	};
 	return image;
 };

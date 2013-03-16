@@ -23,19 +23,13 @@ var get = module.exports.get = function(name, next) {
 };
 
 var sync = module.exports.sync = function(name, callback) {
-	resource.toFolder(pf.getPath(name), function(err, msg, folder) {
+	resource(pf.getPath(name), function(err, msg, folder) {
 		if (err && err.code == "ENOENT") {
 			folder.remove(function() {
 				callback(err, msg, {});
 			});
 		} else {
-			filetype(folder.files[0]).thumbnail(function (tm, ts) {
-				folder.thumbnail_m = tm;
-				folder.thumbnail_s = ts;
-				folder.save(function() {
-					callback(null, msg, folder);
-				});
-			});
+			callback(null, msg, folder);
 		}
 	});
 };
@@ -60,17 +54,8 @@ var view = module.exports.view = function(folderName, fileName, next) {
 
 var upstream = module.exports.upstream = function(callback) {
 	pf.processAll(configs.folders.upstream, function(file, next) {
-		resource.toFolder(file, function(err, msg, data) {
-			filetype(data.files[0]).thumbnail(function (tm, ts) {
-				data.thumbnail_m = tm;
-				data.thumbnail_s = ts;
-				data.save(function(err, data) {
-					if (err) {
-						console.log (err);
-					}
-					next();
-				});
-			});
+		resource(file, function(err, msg, data) {
+			next();
 		});
 	}, function(err, data) {
 		callback(null, "Complete upload folders in Upstream.");
@@ -83,17 +68,8 @@ module.exports.syncAll = function(callback) {
 	};
 	
 	var _toFolder = function (path, next) {
-		resource.toFolder(path, function(err, msg, data) {
-			filetype(data.files[0]).thumbnail(function (tm, ts) {
-				data.thumbnail_m = tm;
-				data.thumbnail_s = ts;
-				data.save(function(err, data) {
-					if (err) {
-						console.log(err);
-					}
-					next();
-				});
-			});
+		resource(path, function(err, msg, data) {
+			next();
 		});
 	};
 	
