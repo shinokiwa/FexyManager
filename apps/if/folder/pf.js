@@ -50,7 +50,7 @@ var exStat = module.exports.exStat = function(path, callback) {
 };
 
 var baseName = module.exports.baseName = pt.basename;
-var baseName = module.exports.extName = pt.extname;
+var extName = module.exports.extName = pt.extname;
 var dirName = module.exports.dirName = pt.dirname;
 
 var exmkDir = module.exports.exmkDir = function(path, callback) {
