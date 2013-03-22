@@ -62,7 +62,7 @@ var resource = module.exports = function (path, callback) {
 			_read (baseName, folderPath);
 		});
 	};
-	
+
 	var _init = function (err, stat) {
 		if (stat) {
 			var baseName = pf.baseName(path);
@@ -71,11 +71,16 @@ var resource = module.exports = function (path, callback) {
 				_read (baseName, folderPath);
 			} else {
 				if (pf.existsSync(folderPath)) {
-					var i = 1;
-					while (pf.existsSync(folderPath + '(' + i + ')')) {
+					var i = 0;
+					do {
 						i++;
-					}
-					folderPath = folderPath + '(' + i + ')';
+						var dirName = pf.dirName (folderPath);
+						var extName = pf.extName (folderPath);
+						baseName = pf.baseName (folderPath, extName) + ' (' + i + ')';
+						if (extName) baseName = baseName + extName;
+						var newPath = pf.path (dirName, baseName);
+					} while (pf.existsSync(newPath));
+					folderPath = newPath;
 				}
 				pf.exmkDir (folderPath, function (err) {
 					_rename (folderPath, baseName, stat);
