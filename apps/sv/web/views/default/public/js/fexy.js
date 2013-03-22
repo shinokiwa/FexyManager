@@ -1,31 +1,83 @@
-$.fn.open = function() {
-	return $(this).trigger('open');
-};
-$.fn.close = function() {
-	return $(this).trigger('close');
-};
+$(document).ready (function(){
+	$.ajaxSetup({
+		dataType : 'json',
+		type : 'post',
+		success : function(res, textStatus, xhr) {
+			if (res.reload == true) {
+				location.reload();
+			}
+			if (res.message)
+				message('info', res.message);
+			if (res.err)
+				message('error', res.message);
+		},
+		error : function(res, textStatus, textError) {
+			if (res.status == 401) Login();
+		}
+	});
+	
+	var Message = (function () {
+		var $message = $('#Message').contents().remove();
+		return function (type, msg) {
+			console.log('MEssage');
+			$($message).addClass('alert-'+type).find('span').text(msg);
+			$('#Message').append($message);
+			$message.slideDown('fast');
+		};
+	})();
 
-var m = {
-	views : (function() {
-		var v = {
-			view : null,
-			folder : null,
-			file : null
-		};
-		var r = function(i) {
-			return (v[i] !== undefined) ? v[i] : void 0;
-		};
-		r.reload = function() {
-			var hash = location.hash.split('/');
-			v.view = (hash[0]) ? hash[0] : '#Index';
+	var hash = function () {
+		return '#' + Array.prototype.slice.apply(arguments).join('/');
+	};
+
+	$(window).bind({
+		'hashchange' : function (e) {
+			var v={},hash = location.hash.split('/');
+			v.view = (hash[0]) ? hash[0] : '#List';
 			v.folder = (hash[1] !== undefined) ? hash[1] : null;
 			v.file = (hash[2] !== undefined) ? hash[2] : null;
+			$('.view:visible').hide();
+			switch (v.view) {
+				case ('#List'):
+					List();
+					break;
+				case ('#Detail'):
+					Detail(v.folder);
+					break;
+				case ('#Full') :
+					Full(v.folder, v.file);
+					break;
+				default:
+					Message ('error', 'Hash Error');
+			}
+		}
+	});
+
+	var Login = (function () {
+		var $login = $('#Login').contents().remove();
+		$($login).find('form').submit(function(e) {
+			e.preventDefault();
+			$.ajax({
+				url : '/user/login.json',
+				data : $(this).serialize()
+			});
+		});
+		return function() {
+			$('.view:visible, #Navi:visible').hide();
+			$(this).append($login).show(0, function() {
+				$('#username').focus();
+			});
 		};
-		return r;
-	})(),
-	hash : function() {
-		return '#' + Array.prototype.slice.apply(arguments).join('/');
-	},
+	})();
+	
+	var List = (function (){
+		
+	});
+
+	$(window).trigger('hashchange');
+});
+/*
+var m = {
 	folders : (function() {
 		var list = [];
 		var conditions = null;
@@ -89,33 +141,7 @@ var m = {
 	}
 };
 
-$.ajaxSetup({
-	dataType : 'json',
-	type : 'post',
-	success : function(res, textStatus, xhr) {
-		if (res.reload == true) {
-			location.reload();
-		}
-		if (res.message)
-			$('#Message').data('msg', res.message).open();
-		if (res.err)
-			$('#Error').data('msg', res.err).open();
-	},
-	error : function(res, textStatus, textError) {
-		if (res.status == 401) {
-			$('#Login').open();
-		}
-	}
-});
-
 $(document).ready(function() {
-	$(window).bind({
-		'hashchange' : function(e) {
-			$('.view:visible').hide();
-			m.views.reload();
-			$(m.views('view')).open();
-		}
-	});
 
 	$('#Navi').bind({
 		'open' : function(e) {
@@ -128,34 +154,6 @@ $(document).ready(function() {
 				$('body').css('padding-top', $('header').height() + 20 + 'px');
 			});
 		}
-	});
-
-	$('#Message, #Error').bind({
-		'open' : function(e) {
-			$(this).children('span').text($(this).data('msg'));
-			$(this).slideDown('fast');
-		}
-	}).children('#Message .close, #Error .close').click(function() {
-		$(this).parent().slideUp('fast');
-	});
-
-	$('#Login').bind({
-		'open' : function() {
-			$('.view:visible, #Navi:visible').close();
-			$('#username, #password').val('');
-			$(this).show(0, function() {
-				$('#username').focus();
-			});
-		},
-		'close' : function() {
-			$(this).hide();
-		}
-	}).children('form').submit(function(e) {
-		e.preventDefault();
-		$.ajax({
-			url : '/user/login.json',
-			data : $(this).serialize()
-		});
 	});
 
 	$('#Search').bind({
@@ -267,6 +265,5 @@ $(document).ready(function() {
 			type : 'get'
 		});
 	});
-
-	$(window).trigger('hashchange');
 });
+*/

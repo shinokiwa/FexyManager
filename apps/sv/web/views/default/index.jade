@@ -12,63 +12,27 @@ html
   //[if lte IE 8]><script type="text/javascript" src="/js/html5.js"></script><![endif]
  body
   header.navbar.navbar-fixed-top
-   #Information.container-fluid Information Area
-   #Navi.navbar-inner.hide
-    button.btn.btn-navbar.pull-left(type="button",data-toggle="collapse",data-target=".nav-collapse")
-     span.icon-bar
-     span.icon-bar
-     span.icon-bar
-    form#Search.pull-right.container-fluid.form-search.navbar-form(name="Search", action="#",method="get")
-     .input-append
-      input.span2.search-query(type="text")
-      button.btn(type="submit")
-       i.icon-search
-    .nav-collapse.collapse
-     ul#NaviMenu.nav
-      li
-       a(href="#")
-        i.icon-tags
-        | Tags
-      li.dropdown
-       a.dropdown-toggle#dropdown-f(role="button", data-toggle="dropdown", data-target="#", href="#")
-        i.icon-folder-open
-        | Folder
-       ul.dropdown-menu(role="menu", aria-labelledby="dropdown-f")
-        li
-         a.json(href="/upstream")
-          i.icon-arrow-up
-          | Upstream
-        li
-         a.json(href="/syncAll")
-          i.icon-refresh
-          | Sync all folders
-      li
-       a(href="/user/logout")
-        i.icon-off
-        | Logout
+   include navi.jade
+  #Message.container-fluid
+   .alert.hide
+    button.close(type="button", data-dismiss="alert") &times;
+    span.description
   #Wrapper
-   .container-fluid
-    #Message.alert.alert-info.hide
-     button.close(type="button") ×
-     span
-    #Error.alert.alert-error.hide
-     button.close(type="button") ×
-     span
-   #Login.view.hide.container-fluid
+   #Login.view.container-fluid
     form#LoginForm.box(name="LoginForm", action="/user/login.json",method="post")
      label UserID
      input#username.input-block-level(type="text", name="username", placeholder="Input UserID here.", maxlength="12", "ime-mode"="off")
      label Password
      input#password.input-block-level(type="password", name="password", placeholder="Input Password here.", maxlength="12", "ime-mode"="off")
      input#submitLogin.btn.btn-primary(type="submit",value="Login", data-loading-text="Loading...")
-   #Index.view.hide
+   #Index.view
     ul.media-list
      li.media.container-fluid.hide
       img.pull-left.media-object.mediaData(src="/img/noimage.jpg", data-src="thumbnail_s")
       .media-body
        h4.mediaData.media-heading(data-src="name") (non-title)
        p.mediaData(data-src="tags") (non-tags)
-   #Detail.view.hide
+   #Detail.view
     .menu.container-fluid
      .menu-more.pull-right.dropdown
       a.btn.dropdown-toggle#dLabel(role="button", data-toggle="dropdown", data-target="#", href="#")

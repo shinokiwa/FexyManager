@@ -25,15 +25,19 @@ body {
 header {
   min-width: 360px;
 }
+.view {
+  display: none;
+}
 /** Informations **/
 #Information {
   background-color: #000;
   height: 20px;
   color: #ccc;
 }
-/** Footers **/
-/** Navigations **/
 /** Message **/
+#Message {
+  position: fixed;
+}
 /** Login **/
 #Login > form {
   max-width: 300px;
