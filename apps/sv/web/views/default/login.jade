@@ -1,0 +1,8 @@
+section#Login.view.container-fluid
+ form#LoginForm.box(name="LoginForm", action="/user/login.json",method="post")
+  label UserID
+  input#username.input-block-level(type="text", name="username", placeholder="Input UserID here.", maxlength="12", "ime-mode"="off")
+  label Password
+  input#password.input-block-level(type="password", name="password", placeholder="Input Password here.", maxlength="12", "ime-mode"="off")
+  input#submitLogin.btn.btn-primary(type="submit",value="Login", data-loading-text="Loading...")
+   

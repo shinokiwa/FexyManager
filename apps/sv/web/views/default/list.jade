@@ -1,0 +1,15 @@
+section#List.view
+ p.lead.container-fluid
+  span(data-src="count") 0
+  |  Folders found.
+ ul#Folders.media-list
+  li.media.container-fluid.template
+   img.pull-left.media-object.mediaData(src="/img/noimage.jpg", data-src="thumbnail_s")
+   .media-body
+    h4.mediaData.media-heading(data-src="name") (non-title)
+    p.mediaData(data-src="tags")
+     a.label.tag.template-tag(href="#")
+      i.icon-white.icon-tag
+      | &nbsp;
+      span.tag-text Tag
+   

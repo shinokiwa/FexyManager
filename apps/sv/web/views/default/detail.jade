@@ -1,0 +1,48 @@
+#Detail.view
+ .menu.container-fluid
+  .menu-more.pull-right.dropdown
+   a.btn.dropdown-toggle#dLabel(role="button", data-toggle="dropdown", data-target="#", href="#")
+    | More 
+    b.caret
+   ul.dropdown-menu(role="menu", aria-labelledby="dLabel")
+    li
+     a(href="#")
+      i.icon-download-alt
+      &nbsp;Download
+    li
+     a(href="#")
+      i.icon-download
+      &nbsp;Download Zip
+    li.divider
+    li
+     a(href="#").sync
+      i.icon-refresh
+      &nbsp;Sync
+    li.divider
+    li
+     a(href="#")
+      i.icon-plus
+      &nbsp;Upload File
+    li.divider
+    li
+     a(href="#")
+      i.icon-trash
+      &nbsp;Delete
+  .menu.btn-group
+   a.btn(href="#")
+    i.icon-list-alt
+    &nbsp;List
+   a.btn.btn-primary.fullView(href="#")
+    i.icon-fullscreen
+    &nbsp;Full View
+ .media.container-fluid
+  img.pull-left.media-object.mediaData(src="/img/noimage.jpg", data-src="thumbnail_m")
+  .media-body
+   h3.mediaData.media-heading(data-src="name") Non-Title
+   p.mediaData(data-src="description") Non description
+ .files.container-fluid
+  h5 Files
+  ul.file-list.nav.nav-list
+   li.template-file
+    i.icon-file
+    span.fileData(data-src="name")

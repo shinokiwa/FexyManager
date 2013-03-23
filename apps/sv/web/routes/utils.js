@@ -4,7 +4,6 @@ var u = {
 		useJSON: function(req, res, next) {
 			res.locals = {
 				err: null,
-				reload: null,
 				auth: null,
 				message: null,
 				data: null,

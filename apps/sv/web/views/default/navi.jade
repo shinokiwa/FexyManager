@@ -1,34 +1,37 @@
-#Information.container-fluid Information Area
-#Navi.navbar-inner
- button.btn.btn-navbar.pull-left(type="button",data-toggle="collapse",data-target=".nav-collapse")
-  span.icon-bar
-  span.icon-bar
-  span.icon-bar
- form#Search.pull-right.container-fluid.form-search.navbar-form(name="Search", action="#",method="get")
-  .input-append
-   input.span2.search-query(type="text")
-   button.btn(type="submit")
-    i.icon-search
- .nav-collapse.collapse
-  ul#NaviMenu.nav
-   li
-    a(href="#")
-     i.icon-tags
-     | Tags
-   li.dropdown
-    a.dropdown-toggle#dropdown-f(role="button", data-toggle="dropdown", data-target="#", href="#")
-     i.icon-folder-open
-     | Folder
-    ul.dropdown-menu(role="menu", aria-labelledby="dropdown-f")
-     li
-      a.json(href="/upstream")
-       i.icon-arrow-up
-       | Upstream
-     li
-      a.json(href="/syncAll")
-       i.icon-refresh
-       | Sync all folders
-   li
-    a(href="/user/logout")
-     i.icon-off
-     | Logout   
+section#Navigations.navbar.navbar-fixed-top
+ section#Information.container-fluid 
+  div.message &nbsp;
+ section#Navi.navbar-inner
+  button.btn.btn-navbar.pull-left(type="button",data-toggle="collapse",data-target=".nav-collapse")
+   span.icon-bar
+   span.icon-bar
+   span.icon-bar
+  form#Find.pull-right.container-fluid.form-search.navbar-form(name="Search", action="#",method="get")
+   .input-append
+    input.span2.search-query(type="text")
+    button.btn(type="submit")
+     i.icon-search
+  .nav-collapse.collapse
+   ul#NaviMenu.nav
+    li
+     a(href="#")
+      i.icon-tags
+      | Tags
+    li.dropdown
+     a.dropdown-toggle#dropdown-f(role="button", data-toggle="dropdown", data-target="#", href="#")
+      i.icon-folder-open
+      | Folder
+     ul.dropdown-menu(role="menu", aria-labelledby="dropdown-f")
+      li
+       a.json(href="/upstream")
+        i.icon-arrow-up
+        | Upstream
+      li
+       a.json(href="/syncAll")
+        i.icon-refresh
+        | Sync all folders
+    li
+     a(href="/user/logout")
+      i.icon-off
+      | Logout   
+      

@@ -11,84 +11,8 @@ html
   script(src="/js/fexy.js", type="text/javascript")
   //[if lte IE 8]><script type="text/javascript" src="/js/html5.js"></script><![endif]
  body
-  header.navbar.navbar-fixed-top
-   include navi.jade
-  #Message.container-fluid
-   .alert.hide
-    button.close(type="button", data-dismiss="alert") &times;
-    span.description
-  #Wrapper
-   #Login.view.container-fluid
-    form#LoginForm.box(name="LoginForm", action="/user/login.json",method="post")
-     label UserID
-     input#username.input-block-level(type="text", name="username", placeholder="Input UserID here.", maxlength="12", "ime-mode"="off")
-     label Password
-     input#password.input-block-level(type="password", name="password", placeholder="Input Password here.", maxlength="12", "ime-mode"="off")
-     input#submitLogin.btn.btn-primary(type="submit",value="Login", data-loading-text="Loading...")
-   #Index.view
-    ul.media-list
-     li.media.container-fluid.hide
-      img.pull-left.media-object.mediaData(src="/img/noimage.jpg", data-src="thumbnail_s")
-      .media-body
-       h4.mediaData.media-heading(data-src="name") (non-title)
-       p.mediaData(data-src="tags") (non-tags)
-   #Detail.view
-    .menu.container-fluid
-     .menu-more.pull-right.dropdown
-      a.btn.dropdown-toggle#dLabel(role="button", data-toggle="dropdown", data-target="#", href="#")
-       | More 
-       b.caret
-      ul.dropdown-menu(role="menu", aria-labelledby="dLabel")
-       li
-        a(href="#")
-         i.icon-download-alt
-         &nbsp;Download
-       li
-        a(href="#")
-         i.icon-download
-         &nbsp;Download Zip
-       li.divider
-       li
-        a(href="#").sync
-         i.icon-refresh
-         &nbsp;Sync
-       li.divider
-       li
-        a(href="#")
-         i.icon-plus
-         &nbsp;Upload File
-       li.divider
-       li
-        a(href="#")
-         i.icon-trash
-         &nbsp;Delete
-     .menu.btn-group
-      a.btn(href="#")
-       i.icon-list-alt
-       &nbsp;List
-      a.btn.btn-primary.fullView(href="#")
-       i.icon-fullscreen
-       &nbsp;Full View
-    .media.container-fluid
-     img.pull-left.media-object.mediaData(src="/img/noimage.jpg", data-src="thumbnail_m")
-     .media-body
-      h3.mediaData.media-heading(data-src="name") Non-Title
-      p.mediaData(data-src="description") Non description
-    .files.container-fluid
-     h5 Files
-     ul.file-list.nav.nav-list
-      li.hide
-       i.icon-file
-       span.fileData(data-src="name")
-   #Full.view.hide
-    .controlls.btn-group
-      a.btn.btnPrev.disabled(href="#")
-       i.icon-backward
-       &nbsp;Prev
-      a.btn.btnBack.btn-primary.fullView(href="#")
-       i.icon-th-list
-      a.btn.btnNext.disabled(href="#")
-       i.icon-forward
-       &nbsp; Next
-    .contents
-   
+  include navi.jade
+  include login.jade
+  include list.jade
+  include detail.jade
+  include full.jade

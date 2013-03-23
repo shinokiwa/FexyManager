@@ -3,31 +3,24 @@ $(document).ready (function(){
 		dataType : 'json',
 		type : 'post',
 		success : function(res, textStatus, xhr) {
-			if (res.reload == true) {
-				location.reload();
-			}
 			if (res.message)
-				message('info', res.message);
+				Navi.Message('info', res.message);
 			if (res.err)
-				message('error', res.message);
+				Navi.Message('error', res.message);
 		},
 		error : function(res, textStatus, textError) {
 			if (res.status == 401) Login();
 		}
 	});
-	
-	var Message = (function () {
-		var $message = $('#Message').contents().remove();
-		return function (type, msg) {
-			console.log('MEssage');
-			$($message).addClass('alert-'+type).find('span').text(msg);
-			$('#Message').append($message);
-			$message.slideDown('fast');
-		};
-	})();
 
 	var hash = function () {
 		return '#' + Array.prototype.slice.apply(arguments).join('/');
+	};
+	
+	var changeView = function (withNavi) {
+		Navi(withNavi);
+		$('.view:visible').hide();
+		$('.alert').alert('close');
 	};
 
 	$(window).bind({
@@ -53,217 +46,262 @@ $(document).ready (function(){
 		}
 	});
 
+	$(document).on('click', '.json', function(e) {
+		e.preventDefault();
+		$.ajax($(this).attr('href'), {
+			type : 'get'
+		});
+	});
+	
+	var Navi = (function () {
+		var $Navi = $('#Navi');
+		var _change = function () {
+			$('body').css('padding-top', $('#Navigations').height() + 20 + 'px');
+		};
+		var r = function (withNavi) {
+			if (withNavi) {
+				$Navi.show(0, _change);
+			} else {
+				$Navi.hide(0, _change);
+			}
+		};
+		r.Message = (function () {
+			var $Information = $('#Information');
+			return function (type, msg) {
+				var $info = $Information.find('.message').clone();
+				$info.text(msg);
+				$Information.append($info);
+				$Information.find('.message:first').slideUp('slow', function () {
+					$(this).remove();
+				});
+			};
+		})();
+		
+		return r;
+	})();
+
 	var Login = (function () {
 		var $login = $('#Login').contents().remove();
-		$($login).find('form').submit(function(e) {
+		$login.submit(function(e) {
 			e.preventDefault();
 			$.ajax({
 				url : '/user/login.json',
 				data : $(this).serialize()
+			}).done(function (res) {
+				if (res.auth) {
+					$(window).trigger('hashchange');
+				} else {
+					$('#username, #password').val('');
+					$('#username').focus();
+				}
 			});
 		});
 		return function() {
-			$('.view:visible, #Navi:visible').hide();
-			$(this).append($login).show(0, function() {
+			changeView(false);
+			$('#Login').html($login.clone(true)).show(0, function() {
 				$('#username').focus();
 			});
 		};
 	})();
 	
 	var List = (function (){
-		
-	});
-
-	$(window).trigger('hashchange');
-});
-/*
-var m = {
-	folders : (function() {
-		var list = [];
-		var conditions = null;
-		var f = function(fn) {
-			if (list.length) {
-				fn(false, list);
-			} else {
-				m.folders.search(conditions, fn);
-			}
+		var _change = true;
+		var _scroll = 0;
+		var $Folders = $('#Folders');
+		var $List = $('#List');
+		var $Template = $List.find('.template').remove().removeClass('template');
+		var $TagTemplate = $Template.find('.template-tag').remove().removeClass('template-tag');
+		var _show = function () {
+			changeView(true);
+			$('#List').show();
+			$(window).scrollTop(_scroll);
 		};
-		f.search = function(c, fn) {
+		
+		var _find = function () {
 			$.ajax('./folder/search.json', {
-				data : c,
+				data : $('#Find').serialize(),
 			}).done(function(res) {
-				list = res.data;
-				fn(true, list);
+				_scroll = 0;
+				$Folders.contents().remove();
+				$List.find('[data-src=count]').text (res.data.length);
+				$(res.data).each(function(i, v) {
+					var $folder = $Template.clone();
+					$folder.data(v);
+					$folder.find('[data-src=name]').text(v.name);
+					if (v.thumbnail_s) {
+						$folder.find('[data-src=thumbnail_s]').attr('src', v.thumbnail_s);
+					}
+					if (v.tags && v.tags.length > 0) {
+						$(v.tags).each (function (i,v) {
+							var $Tag = $TagTemplate.clone();
+							$Tag.find('.tag-text').text (v.name);
+							$folder.find('[data-src=tags]').append($Tag);
+						});
+					} else {
+						var $Tag = $TagTemplate.clone();
+						$Tag.find('.tag-text').text ('New!');
+						$folder.find('[data-src=tags]').append($Tag.addClass('tag-new'));
+					}
+					if (!v.files || v.files.length < 1) {
+						var $Tag = $TagTemplate.clone();
+						$Tag.find('.tag-text').text ('Empty!');
+						$folder.find('[data-src=tags]').append($Tag.addClass('tag-empty'));
+					}
+					$Folders.append($folder);
+					$folder.show();
+				});
+				_change = false;
+				_show();
 			});
 		};
-
-		return f;
-	})(),
-	scroll : 0,
-
-	details : (function() {
-		var data = {};
-		var name = '';
-		var d = function(fn) {
-			if (data && name === m.views('folder')) {
-				fn(data);
+		$('#Find').submit(_find);
+		$Folders.on('click', '.media', function (e){
+			e.preventDefault();
+			_scroll = $(window).scrollTop();
+			location.hash = hash('Detail', $(this).data('name'));
+		});
+		
+		var r = function () {
+			if (_change) {
+				_find();
 			} else {
-				name = m.views('folder');
+				_show();
+			};
+		};
+
+		return r;
+	})();
+	
+	var Detail = (function () {
+		var $DetailTemplate = $('#Detail').contents().remove();
+		var $FileTemplate = $DetailTemplate.find('.template-file').remove().removeClass('template-file');
+		$DetailTemplate.find('.fullView').click(function(e) {
+			e.preventDefault();
+			location.hash = hash('Full', _data.name, _data.files[0].name);
+		});
+		$DetailTemplate.find('.sync').click(function(e) {
+			e.preventDefault();
+			$.ajax('/folder/sync.json', {
+				data : {
+					'name' : _data.name
+				}
+			}).done(function(res) {
+				_data = res.data;
+				Detail();
+			});
+		});
+		
+		var _data = {};
+		var _get = function (name, fn) {
+			if (_data && _data.name == name) {
+				fn ();
+			} else {
 				$.ajax('/folder/get.json', {
 					data : {
 						'name' : name
 					}
 				}).done(function(res) {
-					data = res.data;
-					fn(data);
-				}).fail(function(res) {
-					location.hash = '';
+					_data = res.data;
+					fn();
 				});
 			}
+		};
 
+		var r = function (folder) {
+			_get (folder, function () {
+				changeView (true);
+				var $Detail = $DetailTemplate.clone(true);
+
+				$Detail.find('[data-src=name]').text(_data.name);
+				if (_data.thumbnail_m) {
+					$Detail.find('[data-src=thumbnail_m]').attr('src', _data.thumbnail_m);
+				}
+				
+				$(_data.files).each(function (i,v) {
+					var $File = $FileTemplate.clone(true);
+					$File.find('[data-src=name]').text(v.name);
+					$File.show();
+					$Detail.find('.file-list').append($File);
+				});
+				$('#Detail').html($Detail).show();
+			});
 		};
 		
-		d.sync = function (fn) {
-			$.ajax('/folder/sync.json', {
-				data : {
-					'name' : m.views('folder')
+		r.select = function (folder, file, fn) {
+			_get (folder, function () {
+				var prev = null;
+				var next = null;
+				for (var i=0; i < _data.files.length; i++) {
+					if (_data.files[i].name == file) {
+						if (_data.files[i+1]) next = _data.files[i+1];
+						var f = _data.files[i];
+						f.next = next;
+						f.prev = prev;
+						fn(f);
+						break;
+					} else {
+						prev = _data.files[i];
+					}
 				}
-			}).done(function(res) {
-				data = res.data;
-				fn(data);
 			});
 		};
+		
+		return r;
+	})();
 
-		return d;
-	})(),
-	fulls : {
-		now : 0
-	}
-};
-
-$(document).ready(function() {
-
-	$('#Navi').bind({
-		'open' : function(e) {
-			$(this).show(0, function() {
-				$('body').css('padding-top', $('header').height() + 20 + 'px');
-			});
-		},
-		'close' : function(e) {
-			$(this).hide(0, function() {
-				$('body').css('padding-top', $('header').height() + 20 + 'px');
-			});
-		}
-	});
-
-	$('#Search').bind({
-		'submit' : function(e) {
-			e.preventDefault();
-			m.folders.search($(this).serialize(), function() {
-				$('#Index').open();
-			});
-		}
-	});
-
-	$('#Index').bind({
-		'open' : function(e) {
-			m.folders(function(isChange, list) {
-				if (isChange) {
-					$('#Index .media:gt(0)').remove();
-					$(list).each(function(i, v) {
-						var $media = $('#Index .media:first-child').clone().data(v);
-						var $mediaData = $media.find('.mediaData');
-						$mediaData.filter('[data-src=name]').text(v.name);
-						if (v.thumbnail_s) {
-							$mediaData.filter('[data-src=thumbnail_s]').attr('src', v.thumbnail_s);
-						}
-						$('#Index .media-list').append($media);
-						$media.show();
-					});
-				}
-				$('#Navi:hidden').open();
-				$('#Index:hidden').show();
-				$(window).scrollTop(m.scroll);
-			});
-		},
-		'close' : function() {
-			$(this).hide();
-		}
-	}).on('click', ".media-list .media", function(e) {
-		e.preventDefault();
-		m.scroll = $(window).scrollTop();
-		location.hash = m.hash('Detail', $(this).data('name'));
-	});
-
-	$('#Detail').bind({
-		'open' : function(e) {
-			m.details(function(data) {
-				var $mediaData = $('#Detail .mediaData');
-				$mediaData.filter('[data-src=name]').text(data.name);
-				if (data.thumbnail_m) {
-					$mediaData.filter('[data-src=thumbnail_m]').attr('src', data.thumbnail_m);
-				}
-				var $fileList = $('#Detail .files .file-list');
-				$fileList.children(':gt(0)').remove();
-				for ( var i = 0; i < data.files.length; i++) {
-					var $file = $fileList.children('.file-list *:first-child').clone();
-					var $fileData = $file.find('.fileData');
-					$fileData.filter('[data-src=name]').text(data.files[i].name);
-					$fileList.append($file);
-					$file.show();
-				}
-				$('#Detail').show();
-				$('#Navi:hidden').open();
-			});
-		},
-		'close' : function() {
-			$(this).hide();
-		}
-	}).on('click', '.fullView', function(e) {
-		e.preventDefault();
-		m.details(function(data) {
-			location.hash = m.hash('Full', data.name, data.files[0].name);
+	var Full = (function () {
+		var $Full = $('#Full');
+		var $Controll = $Full.find('.controlls');
+		var _timer = null;
+		var _showControll = function () {
+			clearTimeout(_timer);
+			$Controll.show();
+			_timer = setTimeout (function () {
+				$Controll.hide();
+			}, 5000);
+		};
+		
+		$Full.mousemove (function () {
+			_showControll();
 		});
-	}).on('click', '.sync', function(e) {
-		e.preventDefault();
-		m.details.sync(function () {
-			$('#Detail').open();
+		$Controll.mouseover(function () {
+			clearTimeout(_timer);
 		});
-	});
 
-	$('#Full').bind({
-		'open' : function(e) {
-			$('#Navi:visible').close();
-			m.details(function(data) {
-				$(data.files).each(function(i, v) {
-					if (v.name === m.views('file'))
-						m.fulls.now = i;
-				});
-				if (data.files[m.fulls.now - 1]) {
-					$('#Full .controlls .btnPrev').removeClass('disabled').attr('href', m.hash('Full', m.views('folder'), data.files[m.fulls.now - 1].name));
+		$(window).keypress (function (e) {
+			if ($('#Full:visible').size() > 0) {
+				switch (e.keyCode) {
+					case(37):
+						location.hash = $Controll.find('.btnPrev').attr('href');
+						break;
+					case(39):
+						location.hash = $Controll.find('.btnNext').attr('href');
+						break;
+				}
+			}
+		});
+		
+		return function (folder, file) {
+			Detail.select (folder, file, function (data) {
+				changeView (false);
+				$(window).scrollTop(0);
+				$Full.find('.contents').html('<img src="/folder/view/' + folder + '/' + file + '" />');
+				if (data.next == null) {
+					$Controll.find('.btnNext').addClass('disabled').attr('href', location.hash);
 				} else {
-					$('#Full .controlls .btnPrev').addClass('disabled').attr('href', location.hash);
+					$Controll.find('.btnNext').removeClass('disabled').attr('href', hash('Full', folder, data.next.name));
 				}
-				$('#Full .controlls .btnBack').attr('href', m.hash('Detail', m.views('folder')));
-				if (data.files[m.fulls.now + 1]) {
-					$('#Full .controlls .btnNext').removeClass('disabled').attr('href', m.hash('Full', m.views('folder'), data.files[m.fulls.now + 1].name));
+				if (data.prev == null) {
+					$Controll.find('.btnPrev').addClass('disabled').attr('href', location.hash);
 				} else {
-					$('#Full .controlls .btnNext').addClass('disabled').attr('href', location.hash);
+					$Controll.find('.btnPrev').removeClass('disabled').attr('href', hash('Full', folder, data.prev.name));
 				}
+				$Controll.find('.btnBack').attr('href', hash('Detail', folder));
+				_showControll();
+				$Full.show(0);
 			});
-			$('#Full .contents').html('<img src="/folder/view/' + m.views('folder') + '/' + m.views('file') + '" />');
-			$(this).show(0);
-		},
-		'close' : function() {
-			$(this).hide();
-		}
-	});
-
-	$('.json').click(function(e) {
-		e.preventDefault();
-		$.ajax($(this).attr('href'), {
-			type : 'get'
-		});
-	});
+		};
+	})();
+	
+	$(window).trigger('hashchange');
 });
-*/

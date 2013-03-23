@@ -6,7 +6,6 @@ module.exports.login = function (utils) {
 		if (req.body.username && req.body.password) {
 			auth.login (req.body.username, req.body.password, function(err, msg, data) {
 				req.session.user = data;
-				if (data.auth) res.locals.reload = true;
 				res.locals.set({
 					err: err,
 					message: msg,
@@ -24,8 +23,6 @@ module.exports.login = function (utils) {
 module.exports.logout = function (utils) {
 	return [utils.useJSON, function(req, res) {
 		req.session.user = {};
-		res.locals.set({
-			reload: true
-		}).send();
+		res.locals.send();
 	}];
 };
