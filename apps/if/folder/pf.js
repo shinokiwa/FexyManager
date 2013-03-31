@@ -93,21 +93,76 @@ var exmkDir = module.exports.exmkDir = function(path, callback) {
 };
 
 var exReadDir = module.exports.exReadDir = function (path, callback) {
-	fs.readdir(path, function (err, data) {
-		if (err) {
-			console.log (err);
-			callback (err, []);
-		} else {
-			var files = new Array();
-			for (var i =0; i< data.length; i++) {
-				if (data[i] !== configs.folders.info) {
-					files.push (pt.join(path, data[i]));
-				};
-			}
+	var files = new Array();
+	var cnt = 0;
+	
+	var _callback = function () {
+		if (--cnt <= 0) {
 			callback (null, files);
+		}
+	};
+	
+	var _rec = function (file) {
+		if (file == configs.folders.info) {
+			_callback();
+		} else {
+			var _path = pt.join(path, file);
+			files.push (_path);
+			if (fs.statSync (_path).isDirectory()) {
+				exReadDir (_path, function (err, data) {
+					files = files.concat(data);
+					_callback();
+				});
+			} else {
+				_callback();
+			}
+		}
+	};
+	
+	fs.readdir(path, function (err, data) {
+		if (err || data.length == 0) {
+			callback (err, files);
+		} else {
+			cnt = data.length;
+			data.forEach (_rec);
 		}
 	});
 };
 
 var rename = module.exports.rename = fs.rename;
 var existsSync = module.exports.existsSync = fs.existsSync;
+
+var rmDirR = module.exports.rmDirR = function(path, callback) {
+	var cnt = 0;
+	
+	var _callback = function (err) {
+		if (err) {
+			console.log (err);
+		}
+		if (--cnt <= 0) {
+			fs.rmdir (path, function (err) {
+				callback (null, null, null);
+			});
+		}
+	};
+	
+	var _unlink = function (file) {
+		if (fs.statSync(file).isDirectory()) {
+			fs.rmdir (file, _callback);
+		} else {
+			fs.unlink (file, _callback);
+		}
+	};
+	
+	exReadDir(path, function (err, data) {
+		if (err || data.length == 0) {
+			_callback ();
+		} else {
+			var files = data.sort().reverse();
+			cnt = files.length;
+			files.forEach (_unlink);
+		}
+	});
+};
+
+module.exports.unlink = fs.unlink;

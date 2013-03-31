@@ -168,6 +168,9 @@ $(document).ready (function(){
 				_show();
 			};
 		};
+		r.reload = function () {
+			_change = true;
+		};
 
 		return r;
 	})();
@@ -175,6 +178,8 @@ $(document).ready (function(){
 	var Detail = (function () {
 		var $DetailTemplate = $('#Detail').contents().remove();
 		var $FileTemplate = $DetailTemplate.find('.template-file').remove().removeClass('template-file');
+		var _data = {};
+
 		$DetailTemplate.find('.fullView').click(function(e) {
 			e.preventDefault();
 			location.hash = hash('Full', _data.name, _data.files[0].name);
@@ -191,7 +196,20 @@ $(document).ready (function(){
 			});
 		});
 		
-		var _data = {};
+		$DetailTemplate.find('.remove').click(function(e) {
+			e.preventDefault();
+			if (window.confirm('Are you sure you want to delete folder?')) {
+				$.ajax('/folder/remove.json', {
+					data : {
+						'name' : _data.name
+					}
+				}).done(function(res) {
+					List.reload();
+					location.hash = '#';
+				});
+			}
+		});
+		
 		var _get = function (name, fn) {
 			if (_data && _data.name == name) {
 				fn ();

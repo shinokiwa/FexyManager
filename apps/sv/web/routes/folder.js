@@ -61,3 +61,15 @@ module.exports.view = function(utils) {
 		});
 	}];
 };
+
+module.exports.remove = function(utils) {
+	return [utils.useJSON, utils.auth, function(req, res) {
+		fs.remove (req.body.name, function(err, msg, data) {
+			res.locals.set({
+				err: err,
+				message: 'Removed Folder : '+req.body.name,
+				data: data
+			}).send();
+		});
+	}];
+};

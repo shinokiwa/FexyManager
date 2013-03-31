@@ -12,6 +12,7 @@ module.exports = function(app) {
 	app.post('/folder/search.json', folder.search(utils));
 	app.post('/folder/get.json', folder.get(utils));
 	app.post('/folder/sync.json', folder.sync(utils));
+	app.post('/folder/remove.json', folder.remove(utils));
 	app.get('/folder/view/:folder/:file', folder.view(utils));
 	app.post('/user/login.json', user.login(utils));
 	app.get('/user/logout', user.logout(utils));

@@ -90,3 +90,16 @@ module.exports.syncAll = function(callback) {
 	
 	Folders.remove({}, _root);
 };
+
+var remove = module.exports.remove = function (name, callback) {
+	var path = pf.getPath(name);
+	Folders.remove({
+		name : name
+	}, function(err) {
+		pf.unlink (pf.path(path, configs.folders.info), function (err) {
+			pf.rmDirR (path, function (err) {
+				callback(err, null, null);
+			});
+		});
+	});
+};

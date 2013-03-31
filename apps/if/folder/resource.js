@@ -32,6 +32,7 @@ var resource = module.exports = function (path, callback) {
 	var _read = function (baseName, folderPath) {
 		info.read(baseName, function (err,msg,folderInfo) {
 			pf.exReadDir(folderPath, function (err, files) {
+				console.log (baseName);
 				if (err) {
 					_err(err.message);
 				} else {
