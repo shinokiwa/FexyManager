@@ -28,6 +28,7 @@ module.exports = function(folder, fileNum) {
 					} else {
 						image.folder.thumbnail_s = defaultType.toDataSchema(sData, image.folder.files[image.fileNum].type);
 						image.folder.thumbnail_m = defaultType.toDataSchema(mData, image.folder.files[image.fileNum].type);
+						console.log (mData);
 						callback (null, image.folder);
 					}
 				});

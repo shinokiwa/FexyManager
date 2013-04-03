@@ -29,10 +29,10 @@ var resource = module.exports = function (path, callback) {
 		} else {
 			folder = new folders (folderInfo);
 		}
-		if (folder.thumbnail_s == null || folder.thumbnail_m == null) {
-			fileType(folder, 0).thumbnail(_doSave);
-		} else {
+		if (Boolean(folder.thumbnail_s) && Boolean(folder.thumbnail_m)) {
 			_doSave (null, folder);
+		} else {
+			fileType(folder, 0).thumbnail(_doSave);
 		}
 	};
 
