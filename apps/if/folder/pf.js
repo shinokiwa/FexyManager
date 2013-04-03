@@ -5,22 +5,14 @@
  */
 var fs = require('fs');
 var pt = require('path');
-var async = require('async');
 var configs = require('../../configs');
 
-module.exports.processAll = function(root, filter, callback) {
-	fs.readdir(root, function(err, data) {
-		var folders = new Array();
-		for ( var i = 0; i < data.length; i++) {
-			if (data[i] != '.' && data[i] != '..') {
-				folders.push(pt.join(root, data[i]));
-			}
-		}
-		async.filter(folders, filter, function(data) {
-			if (typeof callback === "function")
-				callback(null, data);
-		});
-	});
+module.exports.getAllBlocks = function(callback) {
+	fs.readdir(configs.folders.root, callback);
+};
+
+module.exports.getAllByBlock = function(block, callback) {
+	fs.readdir(pt.join(configs.folders.root, block), callback);
 };
 
 module.exports.path = function() {
@@ -132,6 +124,7 @@ var exReadDir = module.exports.exReadDir = function (path, callback) {
 var rename = module.exports.rename = fs.rename;
 var existsSync = module.exports.existsSync = fs.existsSync;
 
+var rmDir = module.exports.rmDir = fs.rmdir;
 var rmDirR = module.exports.rmDirR = function(path, callback) {
 	var cnt = 0;
 	

@@ -10,7 +10,6 @@
     "jade": "*",
     "stylus": "*",
     "mongoose": ">= 3.4.0",
-    "async": "*",
     "mime": "*",
     "imagemagick": "*"
   }

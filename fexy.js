@@ -1,6 +1,3 @@
-var path = require ('path');
-var fs = require ('fs');
-var exec = require ('child_process').exec;
 var configs = require ('./apps/configs');
 var d = require ('domain').create();
 
@@ -22,11 +19,16 @@ d.run (function () {
 	var c = {
 		start: function () {
 			require('./apps/sv/web').start(function (err, msg) {
-				process.stdout.write (msg + "\n");
+				if (msg) process.stdout.write (msg + "\n");
 			});
 		},
-		sync: function () {
-			
+		'sync-all': function () {
+			require ('./apps/if/folder').syncAll(function (err, msg) {
+				if (msg) process.stdout.write (msg + "\n");
+			}, function (err,msg) {
+				if (msg) process.stdout.write (msg + "\n");
+				process.exit(0);
+			});
 		},
 		"create-user": function () {
 			controllers.user.create(process.argv[3], process.argv[4], complete);
