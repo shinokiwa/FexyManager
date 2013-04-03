@@ -20,10 +20,11 @@ module.exports = function(folder, fileNum) {
 
 		create(64, function(err, sData) {
 			if (err) {
-				callback (err);
+				callback (err, image.folder);
 			} else {
 				create(140, function(err, mData) {
 					if (err) {
+						callback (err, image.folder);
 					} else {
 						image.folder.thumbnail_s = defaultType.toDataSchema(sData, image.folder.files[image.fileNum].type);
 						image.folder.thumbnail_m = defaultType.toDataSchema(mData, image.folder.files[image.fileNum].type);
