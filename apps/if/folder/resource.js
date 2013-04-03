@@ -17,22 +17,28 @@ var resource = module.exports = function (path, callback) {
 		callback (e, null, null);
 	};
 	
+	var _doSave = function (err, folder) {
+		folder.save (function (err, data) {
+			callback (err, null, data);
+		});
+	};
+
 	var _save = function (folder, folderInfo) {
-		if (folder) {
+		if (folder instanceof folders) {
 			folder.set (folderInfo);
 		} else {
 			folder = new folders (folderInfo);
 		}
-		folder.save (function (err, data) {
-			callback (err, null, data);
-			fileType(data.files[0]).thumbnail(data.name, data.files[0]);
-		});
+		if (folder.thumbnail_s == null || folder.thumbnail_m == null) {
+			fileType(folder, 0).thumbnail(_doSave);
+		} else {
+			_doSave (null, folder);
+		}
 	};
 
 	var _read = function (baseName, folderPath) {
 		info.read(baseName, function (err,msg,folderInfo) {
 			pf.exReadDir(folderPath, function (err, files) {
-				console.log (baseName);
 				if (err) {
 					_err(err.message);
 				} else {

@@ -8,10 +8,11 @@ var mime = {
 	"image/gif": image
 };
 
-module.exports = function (file) {
+module.exports = function (folder, fileNum) {
+	var file = folder.files[fileNum];
 	if (file && mime[file.type]) {
-		return mime[file.type](file);
+		return mime[file.type](folder, fileNum);
 	} else {
-		return new defaultType ();
+		return new defaultType (folder, fileNum);
 	}
 };
