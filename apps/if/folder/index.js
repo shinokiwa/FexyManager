@@ -60,23 +60,23 @@ module.exports.syncAll = function(start, complete) {
 		syncAll_onProcess = false;
 	};
 
-	var logicalList = new Array ();
-	
-	var _removeLogical = function () {
+	var logicalList = new Array();
+
+	var _removeLogical = function() {
 		var logical = logicalList.shift();
 		if (logical) {
 			if (!pf.existsSync(pf.getPath(logical.name))) {
-				console.log ('Remove logical folder no exists. : ' + logical.name);
+				console.log('Remove logical folder no exists. : ' + logical.name);
 				logical.remove();
 			}
-			setTimeout (arguments.callee, 0);
+			setTimeout(arguments.callee, 0);
 		} else {
 			_complete();
 		}
 	};
-	
+
 	var _toFolder = function(path, next) {
-		console.log ('Convert to folder from ' + path);
+		console.log('Convert to folder from ' + path);
 		resource(path, function(err, msg, data) {
 			next();
 		});
@@ -87,10 +87,10 @@ module.exports.syncAll = function(start, complete) {
 	var _syncFolders = function() {
 		var folder = folderList.shift();
 		if (folder) {
-			_toFolder (folder, arguments.callee);
+			_toFolder(folder, arguments.callee);
 		} else {
-			Folders.find({}, function (err, data) {
-				for (var i=0;i<data.length;i++) {
+			Folders.find({}, function(err, data) {
+				for ( var i = 0; i < data.length; i++) {
 					logicalList.push(data[i]);
 				}
 				_removeLogical();
@@ -106,11 +106,11 @@ module.exports.syncAll = function(start, complete) {
 				console.log('Read block : ' + block);
 				pf.getAllByBlock(block, function(err, data) {
 					if (data.length == 0) {
-						console.log ('Delete empty block : ' + block);
-						pf.rmDir (pf.path(configs.folders.root, block));
+						console.log('Delete empty block : ' + block);
+						pf.rmDir(pf.path(configs.folders.root, block));
 					} else {
-						data.forEach (function (v) {
-							folderList.push (pf.path(configs.folders.root, block, v));
+						data.forEach(function(v) {
+							folderList.push(pf.path(configs.folders.root, block, v));
 						});
 					}
 				});
@@ -159,12 +159,43 @@ var remove = module.exports.remove = function(name, callback) {
 	});
 };
 
-var upstream = module.exports.upstream = function(callback) {
-	pf.processAll(configs.folders.upstream, function(file, next) {
-		resource(file, function(err, msg, data) {
+var upstream_onProcess = false;
+
+var upstream = module.exports.upstream = function(start, complete) {
+	var _complete = function(err, result) {
+		complete(null, "Complete the upstream process.");
+		upstream_onProcess = false;
+	};
+
+	var _toFolder = function(path, next) {
+		console.log('Convert to folder from ' + path);
+		resource(path, function(err, msg, data) {
 			next();
 		});
-	}, function(err, data) {
-		callback(null, "Complete upload folders in Upstream.");
-	});
+	};
+
+	var folderList = new Array();
+
+	var _syncFolders = function() {
+		var folder = folderList.shift();
+		if (folder) {
+			_toFolder(folder, arguments.callee);
+		} else {
+			_complete();
+		}
+	};
+
+	if (upstream_onProcess) {
+		start(null, 'Another upstream process is already running.', null);
+		complete(null, null, null);
+	} else {
+		upstream_onProcess = true;
+		start(null, 'Start the upstream process.', null);
+		pf.getUpstreams(function(err, data) {
+			data.forEach(function(v) {
+				folderList.push(pf.path(configs.folders.upstream, v));
+			});
+			setTimeout(_syncFolders, 0);
+		});
+	}
 };

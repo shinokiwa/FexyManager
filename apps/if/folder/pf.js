@@ -15,6 +15,10 @@ module.exports.getAllByBlock = function(block, callback) {
 	fs.readdir(pt.join(configs.folders.root, block), callback);
 };
 
+module.exports.getUpstreams = function(callback) {
+	fs.readdir(configs.folders.upstream, callback);
+};
+
 module.exports.path = function() {
 	return pt.join.apply(pt, arguments);
 };

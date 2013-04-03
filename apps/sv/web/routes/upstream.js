@@ -10,6 +10,8 @@ module.exports.index = function(utils) {
 				message: msg,
 				data: data
 			}).send();
+		}, function (err, msg, data){
+			
 		});
 	}];
 };
